@@ -50,6 +50,13 @@ namespace FEM2A {
             mesh.save("data/geothermie_4.mesh");
             return true;
         }
-
+        
+        bool test_quadrature()
+        {
+            std::cout <<"Test de quadrature\n";
+            Quadrature quadrat_test;
+            // quadrat_test.get_quadrature(2);
+            return true;
+        }
     }
 }
