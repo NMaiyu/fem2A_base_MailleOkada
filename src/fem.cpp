@@ -89,6 +89,7 @@ namespace FEM2A {
         double* pts = NULL;
         int nb_pts = 0;
         Quadrature Q;
+        std::cout <<"debut\n";
         if ( order == 0 && !border ) {
             pts = const_cast<double*>(triangle_P0);
             nb_pts = 1;
@@ -111,6 +112,7 @@ namespace FEM2A {
             std::cout << "Quadrature not implemented for order " << order << std::endl;
             assert( false );
         }
+        std::cout<<"boucles debut faites\n";
         Q.wxy_.resize(nb_pts * 3);
         for ( int i = 0; i < nb_pts; ++i ) {
             if ( !border ) {

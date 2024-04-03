@@ -54,8 +54,12 @@ namespace FEM2A {
         bool test_quadrature()
         {
             std::cout <<"Test de quadrature\n";
-            Quadrature quadrat_test;
-            // quadrat_test.get_quadrature(2);
+            Quadrature quadrat_test = Quadrature::get_quadrature(2);
+            int poids;
+            for(int i=0; i<quadrat_test.nb_points() ;++i){
+                poids += quadrat_test.weight(i);
+            }
+            std::cout <<poids <<std::endl;
             return true;
         }
     }
