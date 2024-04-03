@@ -53,7 +53,7 @@ namespace FEM2A {
      * \brief ElementMapping is a class used to represent the mapping
      *        of an element from its reference space to the world space.
      *        Reference elements:
-     *          segment: [0,1]
+     *          segment: [0,1] entre (0,0) et (1,0) en gros
      *          triangle: (0,0) (1,0) (0,1)
      */
     class ElementMapping {

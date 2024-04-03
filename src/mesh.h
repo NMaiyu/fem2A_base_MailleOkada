@@ -21,7 +21,6 @@ namespace FEM2A {
             int nb_edges() const ;
             int nb_triangles() const ;
 
-            // ici, edge_index donne en quelques sortes l'élément sur lequel on est
             vertex get_vertex( int vertex_index ) const ;
             vertex get_edge_vertex( int edge_index, int vertex_local_index ) const ;
             vertex get_triangle_vertex( int triangle_index, int vertex_local_index ) const ;

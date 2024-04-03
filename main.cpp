@@ -28,15 +28,17 @@ using namespace FEM2A;
 
 void run_tests()
 {
-    const bool t_opennl = true;
-    const bool t_lmesh = true;
-    const bool t_io = true;
-    const bool t_quad = true;
+    const bool t_opennl = false;
+    const bool t_lmesh = false;
+    const bool t_io = false;
+    const bool t_quad = false;
+    const bool t_elmapping = true;
 
     if( t_opennl ) test_opennl();
     if( t_lmesh ) Tests::test_load_mesh();
     if( t_io ) Tests::test_load_save_mesh();
     if( t_quad ) Tests::test_quadrature();
+    if (t_elmapping ) Tests::test_elementMapping();
 }
 
 void run_simu()

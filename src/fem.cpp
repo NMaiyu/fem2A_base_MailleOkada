@@ -133,9 +133,38 @@ namespace FEM2A {
         : border_( border )
     {
         std::cout << "[ElementMapping] constructor for element " << i << " ";
-        if ( border ) std::cout << "(border)";
-        std::cout << '\n';
         // TODO
+        if ( border ) 
+        {
+            std::cout << "(edge border)\n";
+            
+            // Gets the vertices of the element
+            vertices_.push_back(M.get_edge_vertex(i, 0));
+            vertices_.push_back(M.get_edge_vertex(i,1));
+            
+            // Prints the vertices
+            std::cout<<"x y\n";
+            std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
+            std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
+            std::cout <<"\n";
+        }
+        
+        else 
+        {
+            std::cout << "(triangle border)\n";
+            
+            // Gets the vertices of the element
+            vertices_.push_back(M.get_triangle_vertex(i, 0));
+            vertices_.push_back(M.get_triangle_vertex(i,1));
+            vertices_.push_back(M.get_triangle_vertex(i,2));
+            
+            // Prints the vertices
+            std::cout<<"x y\n";
+            std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
+            std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
+            std::cout<<vertices_[2].x<< " "<<vertices_[2].y<< std::endl;
+            std::cout <<"\n";
+        }
     }
 
     vertex ElementMapping::transform( vertex x_r ) const
@@ -143,6 +172,23 @@ namespace FEM2A {
         std::cout << "[ElementMapping] transform reference to world space" << '\n';
         // TODO
         vertex r ;
+        
+        if (border_)
+        {
+            r.x = (1-x_r.x) * vertices_[0].x + x_r.x*vertices_[1].x;
+            r.y = (1-x_r.x) * vertices_[0].y + x_r.x*vertices_[1].y;
+        }
+        
+        else
+        {
+            r.x = (1 - x_r.x - x_r.y)*vertices_[0].x + x_r.x*vertices_[1].x + x_r.y*vertices_[2].x;
+            r.y = (1 - x_r.x - x_r.y)*vertices_[0].y + x_r.x*vertices_[1].y + x_r.y*vertices_[2].y; 
+        }
+        
+        
+        // Prints x_r and r
+        std::cout << "Reference vertex "<< x_r.x << " "<<x_r.y<<std::endl;
+        std::cout << "World space vertex "<< r.x << " " << r.y<<std::endl;
         return r ;
     }
 

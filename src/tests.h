@@ -65,5 +65,20 @@ namespace FEM2A {
             std::cout <<"Triangle area "<<poids <<std::endl;
             return true;
         }
+        
+        bool test_elementMapping()
+        {
+            Mesh mesh;
+            mesh.load("data/square.mesh");
+            int element_index = 0;
+            ElementMapping element(mesh, false, element_index);
+            std::cout << "Creation of element mapping\n";
+            
+            vertex point;
+            point.x =0.5 ; 
+            point.y = 0.5;
+            element.transform(point);
+            return true; 
+        }
     }
 }
