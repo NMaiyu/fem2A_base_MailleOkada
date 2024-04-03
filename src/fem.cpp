@@ -195,15 +195,36 @@ namespace FEM2A {
     DenseMatrix ElementMapping::jacobian_matrix( vertex x_r ) const
     {
         std::cout << "[ElementMapping] compute jacobian matrix" << '\n';
+        std::cout << "Reference vertex (xi="<<x_r.x<<", eta="<<x_r.y<<")\n";
         // TODO
-        DenseMatrix J ;
-        return J ;
+        DenseMatrix J;
+        if(border_){
+            J.set_size(1,2);
+            J.set(0,0,vertices_[1].x - vertices_[0].x);
+            J.set(0,1, vertices_[1].y - vertices_[0].y);
+        }
+        else
+        {
+            J.set_size(2,2);
+            J.set(0,0,vertices_[1].x - vertices_[0].x);
+            J.set(0,1, vertices_[2].x-vertices_[0].x);
+            J.set(1,0,vertices_[1].y - vertices_[0].y);
+            J.set(1,1, vertices_[2].y-vertices_[0].y);
+        }
+        
+       std::cout << "Matrice jacobienne\n";
+       std::cout <<J.get(0,0)<<" "<<J.get(0,1)<<" \n"<<J.get(1,0)<<" "<<J.get(1,1)<<std::endl;
+       return J ;
     }
 
     double ElementMapping::jacobian( vertex x_r ) const
     {
         std::cout << "[ElementMapping] compute jacobian determinant" << '\n';
         // TODO
+        // DenseMatrix J = jacobian_matrix(x_r);
+        // J.det()
+         
+        
         return 0. ;
     }
 

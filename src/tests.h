@@ -70,14 +70,18 @@ namespace FEM2A {
         {
             Mesh mesh;
             mesh.load("data/square.mesh");
-            int element_index = 0;
+            int element_index = 4;
             ElementMapping element(mesh, false, element_index);
             std::cout << "Creation of element mapping\n";
             
             vertex point;
-            point.x =0.5 ; 
-            point.y = 0.5;
+            point.x =0.2; 
+            point.y = 0.4;
             element.transform(point);
+            
+            
+            element.jacobian_matrix(point);
+             
             return true; 
         }
     }
