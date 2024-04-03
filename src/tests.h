@@ -53,13 +53,16 @@ namespace FEM2A {
         
         bool test_quadrature()
         {
-            std::cout <<"Test de quadrature\n";
+            // Creation de la quadrature d'ordre 2 dans un triangle
+            std::cout <<"QUADRATURE TEST\n";
             Quadrature quadrat_test = Quadrature::get_quadrature(2);
-            int poids;
+            
+            // Calcul de l'integrale sur le triangle
+            double poids=0;
             for(int i=0; i<quadrat_test.nb_points() ;++i){
                 poids += quadrat_test.weight(i);
             }
-            std::cout <<poids <<std::endl;
+            std::cout <<"Triangle area "<<poids <<std::endl;
             return true;
         }
     }
