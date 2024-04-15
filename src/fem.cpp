@@ -136,17 +136,17 @@ namespace FEM2A {
         // TODO
         if ( border ) 
         {
-            std::cout << "(edge border)\n";
+            //std::cout << "(edge border)\n";
             
             // Gets the vertices of the element
             vertices_.push_back(M.get_edge_vertex(i, 0));
             vertices_.push_back(M.get_edge_vertex(i,1));
             
             // Prints the vertices
-            std::cout<<"x y\n";
-            std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
-            std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
-            std::cout <<"\n";
+            //std::cout<<"x y\n";
+            //std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
+            //std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
+            //std::cout <<"\n";
         }
         
         else 
@@ -159,11 +159,11 @@ namespace FEM2A {
             vertices_.push_back(M.get_triangle_vertex(i,2));
             
             // Prints the vertices
-            std::cout<<"x y\n";
-            std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
-            std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
-            std::cout<<vertices_[2].x<< " "<<vertices_[2].y<< std::endl;
-            std::cout <<"\n";
+            //std::cout<<"x y\n";
+            //std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
+            //std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
+            //std::cout<<vertices_[2].x<< " "<<vertices_[2].y<< std::endl;
+            //std::cout <<"\n";
         }
     }
 
@@ -187,8 +187,8 @@ namespace FEM2A {
         
         
         // Prints x_r and r
-        std::cout << "Reference vertex "<< x_r.x << " "<<x_r.y<<std::endl;
-        std::cout << "World space vertex "<< r.x << " " << r.y<<"\n"<<std::endl;
+        //std::cout << "Reference vertex "<< x_r.x << " "<<x_r.y<<std::endl;
+        //std::cout << "World space vertex "<< r.x << " " << r.y<<"\n"<<std::endl;
         return r ;
     }
 
@@ -212,8 +212,8 @@ namespace FEM2A {
             J.set(1,1, vertices_[2].y-vertices_[0].y);
         }
         
-       std::cout << "Matrice jacobienne\n";
-       std::cout <<J.get(0,0)<<" "<<J.get(0,1)<<" \n"<<J.get(1,0)<<" "<<J.get(1,1)<<"\n"<<std::endl;
+       //std::cout << "Matrice jacobienne\n";
+       //std::cout <<J.get(0,0)<<" "<<J.get(0,1)<<" \n"<<J.get(1,0)<<" "<<J.get(1,1)<<"\n"<<std::endl;
        return J ;
     }
 
@@ -231,7 +231,7 @@ namespace FEM2A {
             det = pow(1/2,(J.get(0,0)*J.get(0,0) + J.get(1,0)*J.get(1,0)));
             }
         
-       std::cout << "Determinant\n" << det<<"\n"<<std::endl;
+       //std::cout << "Determinant\n" << det<<"\n"<<std::endl;
         return det ;
     }
 
@@ -272,13 +272,13 @@ namespace FEM2A {
         // Pour un triangle
         else{
             switch (i){
-            case 1:
+            case 0:
                 nb = 1 - x_r.x - x_r.y;
                 break;
-            case 2:
+            case 1:
                 nb = x_r.x;
                 break;
-            case 3:
+            case 2:
                 nb = x_r.y;
             }
         }
@@ -307,23 +307,23 @@ namespace FEM2A {
         // Pour un triangle
         else{
             switch (i){
-            case 1:
+            case 0:
                 g.x = -1;
                 g.y = -1;
                 break;
-            case 2:
+            case 1:
                 g.x = 1;
                 g.y = 0;
                 break;
-            case 3:
+            case 2:
                 g.x = 0;
                 g.y = 1;
             }
         }
         
         // Prints the gradient
-        std::cout<<g.x<< " "<<g.y<< std::endl;
-        std::cout <<"\n";
+        //std::cout<<g.x<< " "<<g.y<< std::endl;
+        //std::cout <<"\n";
         
         return g ;
     }
@@ -358,19 +358,16 @@ namespace FEM2A {
                 {
                 double keij;
                 keij =0;
-                for(int q = 0; q< 1; ++q)
+                for(int q = 0; q< quadrature.nb_points(); ++q)
                     {
                     je_inv = elt_mapping.jacobian_matrix(quadrature.point(q)).invert_2x2().transpose();
                     nabla_shape_i = reference_functions.evaluate_grad(i,quadrature.point(q));
                     nabla_shape_j = reference_functions.evaluate_grad(j,quadrature.point(q));
-                     
                         
-                    nabla_base_i.x = je_inv.get(0,0)*nabla_shape_i.x + je_inv.get(0,1)*nabla_shape_i.y;
-                    nabla_base_i.y = je_inv.get(1,0)*nabla_shape_i.x + je_inv.get(1,1)*nabla_shape_i.y;
-                    nabla_base_j.x = je_inv.get(0,0)*nabla_shape_j.x + je_inv.get(0,1)*nabla_shape_j.y;
-                    nabla_base_j.y = je_inv.get(1,0)*nabla_shape_j.x + je_inv.get(1,1)*nabla_shape_j.y;
+                    nabla_base_i = je_inv.mult_2x2_2(nabla_shape_i);
+                    nabla_base_j = je_inv.mult_2x2_2(nabla_shape_j);
                         
-                    keij+= quadrature.weight(q)*coefficient(elt_mapping.transform(quadrature.point(q)))* ( nabla_base_i.x * nabla_base_j.x + nabla_base_i.y* nabla_base_j.y) * elt_mapping.jacobian(quadrature.point(q));
+                    keij+= quadrature.weight(q)*coefficient(elt_mapping.transform(quadrature.point(q)))* dot(nabla_base_i, nabla_base_j) * elt_mapping.jacobian(quadrature.point(q));
                         
 
                     //std::cout << "Inverse \n";
