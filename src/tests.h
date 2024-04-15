@@ -98,16 +98,16 @@ namespace FEM2A {
             return true;
         }
         
-        bool test_AssembleElementaryMatrix()
+        bool test_ElementaryMatrix()
         {
             Mesh mesh;
             mesh.load("data/square.mesh");
             int element_index = 4;
             ElementMapping element(mesh, false, element_index);
             ShapeFunctions fonctions(2,1);
-            Quadrature quadrat = Quadrature::get_quadrature(2);
-            
-            assemble_elementary_matrix(element, fonctions, quadrat,0);
+            Quadrature quadrat = Quadrature::get_quadrature(0,false);
+            DenseMatrix Ke;
+            assemble_elementary_matrix(element, fonctions, quadrat,0, Ke);
             return true;
         }
     }

@@ -344,36 +344,23 @@ namespace FEM2A {
         int ijmax;
         ijmax = reference_functions.nb_functions();
         
-        for (int i =0; i<ijmax; i++)
-        {
-        
-            for (int j=0 ; i<ijmax; j++)
+        for (int i =0; i<ijmax; ++i)
+            {
+            for (int j=0 ; j<ijmax; ++j)
                 {
-                for(int q = 0; q< quadrature.nb_points(); q++)
+                for(int q = 0; q< 1; ++q)
                     {
-                                        
-//                    DenseMatrix je;
-                    
-//                    if (not elt_mapping.border_){
-//                        je = elt_mapping.jacobian_matrix(quadrature.point(q));
-//                        det = elt_mapping.jacobian()
-//                        DenseMatrix je_inv;
-//                        je_inv.set_size(2,2);
-//                        je_inv.set(0,0,je.get(1,1)/det);
-//                        je_inv.set(0,1,-je.get(1,0)/det);
-//                        je_inv.set(1,0,-je.get(0,1)/det);
-//                        je_inv.set(0,1,-je.get(1,1)/det);
-//                        }
+                    if (ijmax == quadrature.nb_points())
+                        {
+                        DenseMatrix je_inv;
+                        je_inv = elt_mapping.jacobian_matrix(quadrature.point(q)).invert_2x2();
+                        std::cout << "Inverse \n";
+                        std::cout <<je_inv.get(0,0)<<" "<<je_inv.get(0,1)<<" \n"<<je_inv.get(1,0)<<" "<<je_inv.get(1,1)<<"\n"<<std::endl;
                         }
-                    
-//                    std::cout << "Matrice jacobienne\n";
-//                    std::cout <<je.get(0,0)<<" "<<je.get(0,1)<<" \n"<<je.get(1,0)<<" "<<je.get(1,1)<<"\n"<<std::endl;
-                    
-                    
-                    }
-               
+                    }   
                 }
-        }
+            }
+    }
        
 
     void local_to_global_matrix(

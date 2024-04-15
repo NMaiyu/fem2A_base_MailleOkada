@@ -33,7 +33,8 @@ void run_tests()
     const bool t_io = false;
     const bool t_quad = false;
     const bool t_elmapping = false;
-    const bool t_shapefunct = true;
+    const bool t_shapefunct = false;
+    const bool t_elementary = true;
 
     if( t_opennl ) test_opennl();
     if( t_lmesh ) Tests::test_load_mesh();
@@ -41,6 +42,7 @@ void run_tests()
     if( t_quad ) Tests::test_quadrature();
     if (t_elmapping ) Tests::test_elementMapping();
     if (t_shapefunct) Tests::test_ShapeFunction();
+    if (t_elementary) Tests::test_ElementaryMatrix();
 }
 
 void run_simu()
