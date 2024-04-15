@@ -342,24 +342,54 @@ namespace FEM2A {
         // TODO
         
         int ijmax;
+        DenseMatrix je_inv;
+        vec2 nabla_shape_i;
+        vec2 nabla_shape_j;
+        vec2 nabla_base_i;
+        vec2 nabla_base_j;
+        
+        
         ijmax = reference_functions.nb_functions();
+        Ke.set_size(ijmax, ijmax);
         
         for (int i =0; i<ijmax; ++i)
             {
             for (int j=0 ; j<ijmax; ++j)
                 {
+                double keij;
+                keij =0;
                 for(int q = 0; q< 1; ++q)
                     {
-                    if (ijmax == quadrature.nb_points())
-                        {
-                        DenseMatrix je_inv;
-                        je_inv = elt_mapping.jacobian_matrix(quadrature.point(q)).invert_2x2();
-                        std::cout << "Inverse \n";
-                        std::cout <<je_inv.get(0,0)<<" "<<je_inv.get(0,1)<<" \n"<<je_inv.get(1,0)<<" "<<je_inv.get(1,1)<<"\n"<<std::endl;
-                        }
-                    }   
+                    je_inv = elt_mapping.jacobian_matrix(quadrature.point(q)).invert_2x2().transpose();
+                    nabla_shape_i = reference_functions.evaluate_grad(i,quadrature.point(q));
+                    nabla_shape_j = reference_functions.evaluate_grad(j,quadrature.point(q));
+                     
+                        
+                    nabla_base_i.x = je_inv.get(0,0)*nabla_shape_i.x + je_inv.get(0,1)*nabla_shape_i.y;
+                    nabla_base_i.y = je_inv.get(1,0)*nabla_shape_i.x + je_inv.get(1,1)*nabla_shape_i.y;
+                    nabla_base_j.x = je_inv.get(0,0)*nabla_shape_j.x + je_inv.get(0,1)*nabla_shape_j.y;
+                    nabla_base_j.y = je_inv.get(1,0)*nabla_shape_j.x + je_inv.get(1,1)*nabla_shape_j.y;
+                        
+                    keij+= quadrature.weight(q)*coefficient(elt_mapping.transform(quadrature.point(q)))* ( nabla_base_i.x * nabla_base_j.x + nabla_base_i.y* nabla_base_j.y) * elt_mapping.jacobian(quadrature.point(q));
+                        
+
+                    //std::cout << "Inverse \n";
+                    //std::cout <<je_inv.get(0,0)<<" "<<je_inv.get(0,1)<<" \n"<<je_inv.get(1,0)<<" "<<je_inv.get(1,1)<<"\n"<<std::endl;
+                    }
+                Ke.set(i,j,keij);
+
                 }
             }
+        std::cout<< "elementary matrix\n";
+        for (int i =0; i<ijmax; ++i)
+            {
+            for (int j=0 ; j<ijmax; ++j)
+                {
+                std::cout<< Ke.get(i,j)<<" ";
+                }
+            std::cout<<std::endl;
+            }
+            
     }
        
 

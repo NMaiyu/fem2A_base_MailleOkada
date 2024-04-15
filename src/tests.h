@@ -11,6 +11,11 @@
 #include <algorithm>
 #include <stdlib.h>
 
+double unit_fct( FEM2A::vertex v )
+{
+    return 1.;
+}
+
 namespace FEM2A {
     namespace Tests {
 
@@ -107,7 +112,10 @@ namespace FEM2A {
             ShapeFunctions fonctions(2,1);
             Quadrature quadrat = Quadrature::get_quadrature(0,false);
             DenseMatrix Ke;
-            assemble_elementary_matrix(element, fonctions, quadrat,0, Ke);
+            
+
+            
+            assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke);
             return true;
         }
     }
