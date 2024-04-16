@@ -396,8 +396,22 @@ namespace FEM2A {
         const DenseMatrix& Ke,
         SparseMatrix& K )
     {
-        std::cout << "Ke -> K" << '\n';
+        std::cout << "Ke -> K for triangle no." << t << " \n";
+        int global_i;
+        int global_j;
+        
         // TODO
+        for (int i=0 ; i<Ke.height() ; ++i)
+        {
+            global_i = M.get_triangle_vertex_index(t, i);
+            for (int j = i ; j<Ke.height() ; j++)
+            {
+                global_j = M.get_triangle_vertex_index(t, j);
+                K.add(global_i,global_j , Ke.get(i,j));
+                K.add(global_j, global_i , Ke.get(i,j));
+            }
+        }
+        
     }
 
     void assemble_elementary_vector(
@@ -442,6 +456,22 @@ namespace FEM2A {
     {
         std::cout << "apply dirichlet boundary conditions" << '\n';
         // TODO
+        int P = 10000;
+        
+        for(int i= 0 ; i<M.nb_edges();++i)
+        {
+            if(attribute_is_dirichlet[M.get_edge_attribute(i)])
+            {
+                
+                if(F[M.get_edge_vertex_index(i,0)] < P*values[i-1])
+                {
+                    K.add(M.get_edge_vertex_index(i,0), M.get_edge_vertex_index(i,0),P);
+                    F[M.get_edge_vertex_index(i,0)] += P*values[i] ;
+                }
+                K.add(M.get_edge_vertex_index(i,1), M.get_edge_vertex_index(i,1),P);
+                F[M.get_edge_vertex_index(i,1)] += P*values[i] ;            
+            }   
+        }
     }
 
     void solve_poisson_problem(

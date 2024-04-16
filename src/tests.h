@@ -110,12 +110,77 @@ namespace FEM2A {
             int element_index = 4;
             ElementMapping element(mesh, false, element_index);
             ShapeFunctions fonctions(2,1);
-            Quadrature quadrat = Quadrature::get_quadrature(0,false);
+            Quadrature quadrat = Quadrature::get_quadrature(6,false);
             DenseMatrix Ke;
             
 
             
             assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke);
+            return true;
+        }
+        
+        bool test_LocalToGlobal()
+        {
+            //  A TESTER POUR UN POINT TOUT SEUL AUSSI !!!
+            // !!!!!!!!!!
+            //!!!!!!!!!!
+            
+            Mesh mesh;
+            mesh.load("data/square.mesh");
+            ShapeFunctions fonctions(2,1);
+            Quadrature quadrat = Quadrature::get_quadrature(0,false);
+            int t_max;
+            t_max = mesh.nb_vertices() * quadrat.nb_points();
+            std::cout << t_max<<std::endl;
+            DenseMatrix Ke ;
+            SparseMatrix K(t_max);
+                        
+            
+            for (int t=0 ; t<mesh.nb_triangles(); ++t)
+            {
+                ElementMapping element(mesh, false, t);
+                assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke);
+                local_to_global_matrix(mesh, t, Ke, K);
+            }
+            
+            K.print();
+            
+            
+            return true;
+        }
+        
+        bool test_BdrConditions()
+        {
+                    const Mesh& M,
+        const std::vector< bool >& attribute_is_dirichlet, /* size: nb of attributes */
+        const std::vector< double >& values, /* size: nb of DOFs */
+        SparseMatrix& K,
+        std::vector< double >& F )
+                        Mesh mesh;
+            mesh.load("data/square.mesh");
+            ShapeFunctions fonctions(2,1);
+            Quadrature quadrat = Quadrature::get_quadrature(0,false);
+            int t_max;
+            t_max = mesh.nb_vertices() * quadrat.nb_points();
+            std::cout << t_max<<std::endl;
+            DenseMatrix Ke ;
+            SparseMatrix K(t_max);
+                        
+            
+            for (int t=0 ; t<mesh.nb_triangles(); ++t)
+            {
+                ElementMapping element(mesh, false, t);
+                assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke);
+                local_to_global_matrix(mesh, t, Ke, K);
+            }
+            
+            std::vector< double > F;
+            F.clear();
+            // Creer une boucle pour faire un F de taille nb_vertices, rempli de 0
+            // Créer attribute_bool : avec qlq true, de longueur nb_edge
+            // Créer values taille nb vertices donc aussi CORRIGER LA FONCTION DANS FEM.CPP
+            
+            apply_cirichlet_boundary_conditions(mesh, attribute_bool, values, K, F)
             return true;
         }
     }
