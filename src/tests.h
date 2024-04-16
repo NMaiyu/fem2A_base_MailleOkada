@@ -221,13 +221,13 @@ namespace FEM2A {
             t_max = mesh.nb_vertices() * quadrat.nb_points();
             std::cout << t_max<<std::endl;
             std::vector< double > Fe;
-            std::vector< double > F(t_max);
+            std::vector< double > F(t_max,0);
                         
             
             for (int t=0 ; t<mesh.nb_triangles(); ++t)
             {
                 ElementMapping element(mesh, false, t);
-                assemble_elementary_vector(element, fonctions, quadrat, unit_fct, F);
+                assemble_elementary_vector(element, fonctions, quadrat, unit_fct, Fe);
                 local_to_global_vector(mesh, false,t, Fe, F);
             }
             
