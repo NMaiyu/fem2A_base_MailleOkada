@@ -34,9 +34,11 @@ void run_tests()
     const bool t_quad = false;
     const bool t_elmapping = false;
     const bool t_shapefunct = false;
-    const bool t_elementary = false;
+    const bool t_elemM = false;
     const bool t_loc_to_glob = false;
-    const bool t_bdr_cond = true;
+    const bool t_bdr_cond = false;
+    const bool t_elemV = false;
+    const bool t_loc_glob_vector = true;
 
     if( t_opennl ) test_opennl();
     if( t_lmesh ) Tests::test_load_mesh();
@@ -44,9 +46,11 @@ void run_tests()
     if( t_quad ) Tests::test_quadrature();
     if (t_elmapping ) Tests::test_elementMapping();
     if (t_shapefunct) Tests::test_ShapeFunction();
-    if (t_elementary) Tests::test_ElementaryMatrix();
+    if (t_elemM) Tests::test_ElementaryMatrix();
     if (t_loc_to_glob) Tests::test_LocalToGlobal();
-    if (t_brd_cond) Tests::test_BdrConditions()
+    if (t_bdr_cond) Tests::test_BdrConditions();
+    if (t_elemV) Tests::test_ElementaryVector();
+    if (t_loc_glob_vector) Tests::test_LocToGlobVector();
 }
 
 void run_simu()

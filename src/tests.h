@@ -120,11 +120,7 @@ namespace FEM2A {
         }
         
         bool test_LocalToGlobal()
-        {
-            //  A TESTER POUR UN POINT TOUT SEUL AUSSI !!!
-            // !!!!!!!!!!
-            //!!!!!!!!!!
-            
+        {           
             Mesh mesh;
             mesh.load("data/square.mesh");
             ShapeFunctions fonctions(2,1);
@@ -151,36 +147,96 @@ namespace FEM2A {
         
         bool test_BdrConditions()
         {
-                    const Mesh& M,
-        const std::vector< bool >& attribute_is_dirichlet, /* size: nb of attributes */
-        const std::vector< double >& values, /* size: nb of DOFs */
-        SparseMatrix& K,
-        std::vector< double >& F )
-                        Mesh mesh;
+            Mesh M;
+            M.load("data/square.mesh");
+            
+            M.set_attribute( unit_fct, 0, true );
+            
+            ShapeFunctions fonctions(2,1);
+            Quadrature quadrat = Quadrature::get_quadrature(0,false);
+            int t_max;
+            t_max = M.nb_vertices() * quadrat.nb_points();
+            DenseMatrix Ke ;
+            SparseMatrix K(t_max);
+            
+            
+            for (int t=0 ; t<M.nb_triangles(); ++t)
+            {
+                ElementMapping element(M, false, t);
+                assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke);
+                local_to_global_matrix(M, t, Ke, K);
+            }
+            
+            std::vector< double > F(M.nb_vertices(), 1);
+            
+            std::vector< bool > attribute_bool(1, true);
+            std::vector< double > values(M.nb_vertices());
+            
+            for (int i =0 ; i<M.nb_vertices(); ++i)
+            {
+                values[i] = M.get_vertex(i).x + M.get_vertex(i).y; 
+            }
+            
+            apply_dirichlet_boundary_conditions(M, attribute_bool, values, K, F);
+            
+            std::vector< double > x(M.nb_vertices(), 0);
+            solve(K,F, x);
+            
+            for (double i :x)
+            {
+                std::cout << i << ' ';
+            }
+            std::cout <<'\n';
+            
+            return true;
+        }
+        
+        bool test_ElementaryVector()
+        {
+            Mesh mesh;
+            mesh.load("data/square.mesh");
+            int element_index = 4;
+            ElementMapping element(mesh, false, element_index);
+            ShapeFunctions fonctions(2,1);
+            Quadrature quadrat = Quadrature::get_quadrature(6,false);
+            std::vector< double > Fe;
+            assemble_elementary_vector(element, fonctions, quadrat, unit_fct, Fe);
+            
+            std::cout << "Fe (pour f=1)\n";
+            for (double i :Fe)
+            {
+                std::cout << i << " ";
+            }
+            std::cout <<"\n";
+            return true;
+        }
+        
+        bool test_LocToGlobVector()
+        {
+            Mesh mesh;
             mesh.load("data/square.mesh");
             ShapeFunctions fonctions(2,1);
             Quadrature quadrat = Quadrature::get_quadrature(0,false);
             int t_max;
             t_max = mesh.nb_vertices() * quadrat.nb_points();
             std::cout << t_max<<std::endl;
-            DenseMatrix Ke ;
-            SparseMatrix K(t_max);
+            std::vector< double > Fe;
+            std::vector< double > F(t_max);
                         
             
             for (int t=0 ; t<mesh.nb_triangles(); ++t)
             {
                 ElementMapping element(mesh, false, t);
-                assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke);
-                local_to_global_matrix(mesh, t, Ke, K);
+                assemble_elementary_vector(element, fonctions, quadrat, unit_fct, F);
+                local_to_global_vector(mesh, false,t, Fe, F);
             }
             
-            std::vector< double > F;
-            F.clear();
-            // Creer une boucle pour faire un F de taille nb_vertices, rempli de 0
-            // Créer attribute_bool : avec qlq true, de longueur nb_edge
-            // Créer values taille nb vertices donc aussi CORRIGER LA FONCTION DANS FEM.CPP
-            
-            apply_cirichlet_boundary_conditions(mesh, attribute_bool, values, K, F)
+            std::cout << "F (pour f=1)\n";
+            for (double i :F)
+            {
+                std::cout << i << " ";
+            }
+            std::cout <<"\n";
             return true;
         }
     }

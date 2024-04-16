@@ -13,9 +13,9 @@ namespace FEM2A {
     void print( const std::vector<double>& x )
     {
         for ( int i = 0; i < x.size(); ++i ) {
-            std::cout << x[i] << " ";
+            //std::cout << x[i] << " ";
         }
-        std::cout << std::endl;
+        //std::cout << std::endl;
     }
 
     /****************************************************************/
@@ -108,7 +108,7 @@ namespace FEM2A {
             pts = const_cast<double*>(segment_P2);
             nb_pts = 2;
         } else {
-            std::cout << "Quadrature not implemented for order " << order << std::endl;
+            //std::cout << "Quadrature not implemented for order " << order << std::endl;
             assert( false );
         }
         Q.wxy_.resize(nb_pts * 3);
@@ -132,7 +132,7 @@ namespace FEM2A {
     ElementMapping::ElementMapping( const Mesh& M, bool border, int i )
         : border_( border )
     {
-        std::cout << "[ElementMapping] constructor for element " << i << " ";
+        //std::cout << "[ElementMapping] constructor for element " << i << " ";
         // TODO
         if ( border ) 
         {
@@ -151,7 +151,7 @@ namespace FEM2A {
         
         else 
         {
-            std::cout << "(triangle border)\n";
+            //std::cout << "(triangle border)\n";
             
             // Gets the vertices of the element
             vertices_.push_back(M.get_triangle_vertex(i, 0));
@@ -169,7 +169,7 @@ namespace FEM2A {
 
     vertex ElementMapping::transform( vertex x_r ) const
     {
-        std::cout << "[ElementMapping] transform reference to world space" << '\n';
+        //std::cout << "[ElementMapping] transform reference to world space" << '\n';
         // TODO
         vertex r ;
         
@@ -194,8 +194,8 @@ namespace FEM2A {
 
     DenseMatrix ElementMapping::jacobian_matrix( vertex x_r ) const
     {
-        std::cout << "[ElementMapping] compute jacobian matrix" << '\n';
-        std::cout << "Reference vertex (xi="<<x_r.x<<", eta="<<x_r.y<<")\n";
+        //std::cout << "[ElementMapping] compute jacobian matrix" << '\n';
+        //std::cout << "Reference vertex (xi="<<x_r.x<<", eta="<<x_r.y<<")\n";
         // TODO
         DenseMatrix J;
         if(border_){
@@ -219,7 +219,7 @@ namespace FEM2A {
 
     double ElementMapping::jacobian( vertex x_r ) const
     {
-        std::cout << "[ElementMapping] compute jacobian determinant" << '\n';
+        //std::cout << "[ElementMapping] compute jacobian determinant" << '\n';
         // TODO
         DenseMatrix J;
         J = jacobian_matrix(x_r); 
@@ -241,7 +241,7 @@ namespace FEM2A {
     ShapeFunctions::ShapeFunctions( int dim, int order )
         : dim_( dim ), order_( order )
     {
-        std::cout << "[ShapeFunctions] constructor in dimension " << dim << '\n';
+        //std::cout << "[ShapeFunctions] constructor in dimension " << dim << '\n';
         // TODO
         assert(order==1);
         
@@ -249,7 +249,7 @@ namespace FEM2A {
 
     int ShapeFunctions::nb_functions() const
     {
-        std::cout << "[ShapeFunctions] number of functions" << '\n';
+        //std::cout << "[ShapeFunctions] number of functions" << '\n';
         // TODO
         
         return dim_+1 ;
@@ -257,8 +257,8 @@ namespace FEM2A {
 
     double ShapeFunctions::evaluate( int i, vertex x_r ) const
     {
-        std::cout << "[ShapeFunctions] evaluate shape function " << i << '\n';
-        std::cout << "Reference vertex (xi="<<x_r.x<<", eta="<<x_r.y<<")\n";
+        //std::cout << "[ShapeFunctions] evaluate shape function " << i << '\n';
+        //std::cout << "Reference vertex (xi="<<x_r.x<<", eta="<<x_r.y<<")\n";
         // TODO
         double nb;
         
@@ -288,7 +288,7 @@ namespace FEM2A {
 
     vec2 ShapeFunctions::evaluate_grad( int i, vertex x_r ) const
     {
-        std::cout << "[ShapeFunctions] evaluate gradient shape function " << i << '\n';
+        //std::cout << "[ShapeFunctions] evaluate gradient shape function " << i << '\n';
         // TODO
         vec2 g ;
         
@@ -338,7 +338,7 @@ namespace FEM2A {
         double (*coefficient)(vertex),
         DenseMatrix& Ke )
     {
-        std::cout << "compute elementary matrix" << '\n';
+        //std::cout << "compute elementary matrix" << '\n';
         // TODO
         
         int ijmax;
@@ -377,14 +377,14 @@ namespace FEM2A {
 
                 }
             }
-        std::cout<< "elementary matrix\n";
+        //std::cout<< "elementary matrix\n";
         for (int i =0; i<ijmax; ++i)
             {
             for (int j=0 ; j<ijmax; ++j)
                 {
-                std::cout<< Ke.get(i,j)<<" ";
+                //std::cout<< Ke.get(i,j)<<" ";
                 }
-            std::cout<<std::endl;
+            //std::cout<<std::endl;
             }
             
     }
@@ -396,7 +396,7 @@ namespace FEM2A {
         const DenseMatrix& Ke,
         SparseMatrix& K )
     {
-        std::cout << "Ke -> K for triangle no." << t << " \n";
+        //std::cout << "Ke -> K for triangle no." << t << " \n";
         int global_i;
         int global_j;
         
@@ -421,8 +421,25 @@ namespace FEM2A {
         double (*source)(vertex),
         std::vector< double >& Fe )
     {
-        std::cout << "compute elementary vector (source term)" << '\n';
+        //std::cout << "compute elementary vector (source term)" << '\n';
         // TODO
+        
+        int imax;
+        double shape_i;
+        
+        
+        imax = reference_functions.nb_functions();
+        Fe.resize(imax);
+        
+        for (int i =0; i<imax; ++i)
+            {
+            Fe[i] =0;
+            for(int q = 0; q< quadrature.nb_points(); ++q)
+                {
+                shape_i = reference_functions.evaluate(i,quadrature.point(q));
+                Fe[i]+= quadrature.weight(q)*source(elt_mapping.transform(quadrature.point(q)))* shape_i * elt_mapping.jacobian(quadrature.point(q));
+                }
+            }
     }
 
     void assemble_elementary_neumann_vector(
@@ -432,7 +449,7 @@ namespace FEM2A {
         double (*neumann)(vertex),
         std::vector< double >& Fe )
     {
-        std::cout << "compute elementary vector (neumann condition)" << '\n';
+        //std::cout << "compute elementary vector (neumann condition)" << '\n';
         // TODO
     }
 
@@ -443,8 +460,19 @@ namespace FEM2A {
         std::vector< double >& Fe,
         std::vector< double >& F )
     {
-        std::cout << "Fe -> F" << '\n';
+        //std::cout << "Fe -> F" << '\n';
+
+        int global_j;
+        F.resize(M.nb_vertices());
+        
         // TODO
+        for (int j=0 ; j<Fe.size() ; ++j)
+        {
+            if (not border) {global_j = M.get_triangle_vertex_index(i, j);}
+            else {global_j = M.get_edge_vertex_index(i, j);}
+            F[global_j]+=Fe[j];
+        }
+        
     }
 
     void apply_dirichlet_boundary_conditions(
@@ -454,22 +482,28 @@ namespace FEM2A {
         SparseMatrix& K,
         std::vector< double >& F )
     {
-        std::cout << "apply dirichlet boundary conditions" << '\n';
+        //std::cout << "apply dirichlet boundary conditions" << '\n';
         // TODO
         int P = 10000;
+        bool* passage = new bool[M.nb_edges()]{false};
         
         for(int i= 0 ; i<M.nb_edges();++i)
         {
             if(attribute_is_dirichlet[M.get_edge_attribute(i)])
             {
                 
-                if(F[M.get_edge_vertex_index(i,0)] < P*values[i-1])
+                if(not passage[M.get_edge_vertex_index(i,0)])
                 {
                     K.add(M.get_edge_vertex_index(i,0), M.get_edge_vertex_index(i,0),P);
-                    F[M.get_edge_vertex_index(i,0)] += P*values[i] ;
+                    F[M.get_edge_vertex_index(i,0)] += P*values[M.get_edge_vertex_index(i,0)] ;
+                    passage[M.get_edge_vertex_index(i,0)] = true;
                 }
-                K.add(M.get_edge_vertex_index(i,1), M.get_edge_vertex_index(i,1),P);
-                F[M.get_edge_vertex_index(i,1)] += P*values[i] ;            
+                if(not passage[M.get_edge_vertex_index(i,1)])
+                {
+                    K.add(M.get_edge_vertex_index(i,1), M.get_edge_vertex_index(i,1),P);
+                    F[M.get_edge_vertex_index(i,1)] += P*values[M.get_edge_vertex_index(i,1)];
+                    passage[M.get_edge_vertex_index(i,1)] = true;
+                }    
             }   
         }
     }

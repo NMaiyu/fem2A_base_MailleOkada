@@ -38,7 +38,48 @@ namespace FEM2A {
             if ( verbose ) {
                 std::cout << " with lots of printed details..." << std::endl;
             }
-            std::cout << "TO BE IMPLEMENTED !!!" << std::endl;
+            
+            Mesh M;
+            M.load(mesh_filename);
+            
+            M.set_attribute( unit_fct, 0, true );
+            
+            ShapeFunctions fonctions(2,1);
+            Quadrature quadrat = Quadrature::get_quadrature(0,false);
+            int t_max;
+            t_max = M.nb_vertices() * quadrat.nb_points();
+            DenseMatrix Ke ;
+            SparseMatrix K(t_max);
+            
+            
+            for (int t=0 ; t<M.nb_triangles(); ++t)
+            {
+                ElementMapping element(M, false, t);
+                assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke);
+                local_to_global_matrix(M, t, Ke, K);
+            }
+            
+            std::vector< double > F(M.nb_vertices(), 1);
+            
+            std::vector< bool > attribute_bool(1, true);
+            std::vector< double > values(M.nb_vertices());
+            
+            for (int i =0 ; i<M.nb_vertices(); ++i)
+            {
+                values[i] = M.get_vertex(i).x + M.get_vertex(i).y; 
+            }
+            
+            apply_dirichlet_boundary_conditions(M, attribute_bool, values, K, F);
+            
+            std::vector< double > x(M.nb_vertices(), 0);
+            solve(K,F, x);
+            
+            for (double i :x)
+            {
+                std::cout << i << ' ';
+            }
+            std::cout <<'\n';
+            
         }
 
     }
