@@ -408,7 +408,7 @@ namespace FEM2A {
             {
                 global_j = M.get_triangle_vertex_index(t, j);
                 K.add(global_i,global_j , Ke.get(i,j));
-
+                K.add(global_j,global_i , Ke.get(i,j));
             }
         }
         
@@ -449,8 +449,25 @@ namespace FEM2A {
         double (*neumann)(vertex),
         std::vector< double >& Fe )
     {
-        //std::cout << "compute elementary vector (neumann condition)" << '\n';
+        //std::cout << "compute elementary vector (source term)" << '\n';
         // TODO
+        
+        int imax;
+        double shape_i;
+        
+        
+        imax = reference_functions_1D.nb_functions();
+        Fe.resize(imax);
+        
+        for (int i =0; i<imax; ++i)
+            {
+            Fe[i] =0;
+            for(int q = 0; q< quadrature_1D.nb_points(); ++q)
+                {
+                shape_i = reference_functions_1D.evaluate(i,quadrature.point(q));
+                Fe[i]+= quadrature_1D.weight(q)*neumann(elt_mapping_1D.transform(quadrature_1D.point(q)))* shape_i * elt_mapping_1D.jacobian(quadrature_1D.point(q));
+                }
+            }
     }
 
     void local_to_global_vector(

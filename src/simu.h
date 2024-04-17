@@ -52,11 +52,11 @@ namespace FEM2A {
             
             // CHOOSE QUADRATURE AND SHAPE FUNCTIONS
             ShapeFunctions fonctions(2,1);
-            Quadrature quadrat = Quadrature::get_quadrature(0,false);
+            Quadrature quadrat = Quadrature::get_quadrature(2,false);
             
             // CREATE EMPTY K AND F
             int t_max;
-            t_max = M.nb_vertices() * quadrat.nb_points();
+            t_max = M.nb_vertices();
             DenseMatrix Ke ;
             SparseMatrix K(t_max);
             std::vector< double > F(t_max,0);
@@ -98,7 +98,11 @@ namespace FEM2A {
             }            
             std::cout <<'\n';
             
-            save_solution(x, "data/square_fine.bb");
+            // CREATE SOLUTION FILE
+            std::string solution_filename;
+            solution_filename.assign(mesh_filename.begin(),mesh_filename.end()-4);
+            solution_filename.append("bb");
+            save_solution(x, solution_filename);
             
         }
         
@@ -123,7 +127,7 @@ namespace FEM2A {
             
             // CREATE EMPTY K, F
             int t_max;
-            t_max = M.nb_vertices() * quadrat.nb_points();
+            t_max = M.nb_vertices() ;
             DenseMatrix Ke ;
             SparseMatrix K(t_max);
             std::vector< double > Fe;
@@ -160,7 +164,11 @@ namespace FEM2A {
             }
             std::cout <<'\n';
             
-            save_solution(x, "data/square.bb");
+            // CREATE SOLUTION FILE
+            std::string solution_filename;
+            solution_filename.assign(mesh_filename.begin(),mesh_filename.end()-4);
+            solution_filename.append("bb");
+            save_solution(x, solution_filename);
             
         }
         
@@ -186,7 +194,7 @@ namespace FEM2A {
             
             // CREATE EMPTY K, F
             int t_max;
-            t_max = M.nb_vertices() * quadrat.nb_points();
+            t_max = M.nb_vertices() ;
             DenseMatrix Ke ;
             SparseMatrix K(t_max);
             std::vector< double > Fe;
@@ -223,7 +231,11 @@ namespace FEM2A {
             }
             std::cout <<'\n';
             
-            save_solution(x, "data/square.bb");
+            // CREATE SOLUTION FILE
+            std::string solution_filename;
+            solution_filename.assign(mesh_filename.begin(),mesh_filename.end()-4);
+            solution_filename.append("bb");
+            save_solution(x, solution_filename);
             
         }
 
