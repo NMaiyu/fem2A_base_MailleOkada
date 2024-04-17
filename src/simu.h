@@ -59,19 +59,15 @@ namespace FEM2A {
             t_max = M.nb_vertices() * quadrat.nb_points();
             DenseMatrix Ke ;
             SparseMatrix K(t_max);
-            std::vector< double > Fe;
             std::vector< double > F(t_max,0);
             
-            // CREATE K AND F
+            // CREATE K
             for (int t=0 ; t<M.nb_triangles(); ++t)
             {
                 ElementMapping element(M, false, t);
                 // K
                 assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke);
                 local_to_global_matrix(M, t, Ke, K);
-                // F
-                assemble_elementary_vector(element, fonctions, quadrat, zero_fct, Fe);
-                local_to_global_vector(M, false,t, Fe, F);
             }
             
             // CHOOSE AND APPLY DIRICHLET CONDITIONS            

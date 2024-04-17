@@ -404,11 +404,11 @@ namespace FEM2A {
         for (int i=0 ; i<Ke.height() ; ++i)
         {
             global_i = M.get_triangle_vertex_index(t, i);
-            for (int j = i ; j<Ke.height() ; j++)
+            for (int j = 0 ; j<Ke.height() ; j++)
             {
                 global_j = M.get_triangle_vertex_index(t, j);
                 K.add(global_i,global_j , Ke.get(i,j));
-                K.add(global_j, global_i , Ke.get(i,j));
+
             }
         }
         
