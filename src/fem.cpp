@@ -485,7 +485,7 @@ namespace FEM2A {
         //std::cout << "apply dirichlet boundary conditions" << '\n';
         // TODO
         int P = 10000;
-        bool* passage = new bool[M.nb_edges()]{false};
+        bool*passage = new bool[M.nb_vertices()]{false};
         
         for(int i= 0 ; i<M.nb_edges();++i)
         {
@@ -504,8 +504,9 @@ namespace FEM2A {
                     F[M.get_edge_vertex_index(i,1)] += P*values[M.get_edge_vertex_index(i,1)];
                     passage[M.get_edge_vertex_index(i,1)] = true;
                 }    
-            }   
+            }
         }
+        delete passage;
     }
 
     void solve_poisson_problem(
