@@ -65,7 +65,7 @@ namespace FEM2A {
 
         void pure_dirichlet_pb( const std::string& mesh_filename, bool verbose )
         {
-            std::cout << "Solving a pure Dirichlet problem" << std::endl;
+            std::cout << "Solving a pure Dirichlet problem on "<<mesh_filename << std::endl;
             if ( verbose ) {
                 std::cout << " with lots of printed details..." << std::endl;
             }
@@ -136,7 +136,7 @@ namespace FEM2A {
         
         void source_dirichlet_pb( const std::string& mesh_filename, bool verbose )
         {
-            std::cout << "Solving a Dirichlet problem with source" << std::endl;
+            std::cout << "Solving a Dirichlet problem with source on "<<mesh_filename  << std::endl;
             if ( verbose ) {
                 std::cout << " with lots of printed details..." << std::endl;
             }
@@ -171,6 +171,7 @@ namespace FEM2A {
                 // F
                 assemble_elementary_vector(element, fonctions, quadrat, unit_fct, Fe);
                 local_to_global_vector(M, false,t, Fe, F);
+                
             }            
             
             // CHOOSE AND APPLY DIRICHLET CONDITIONS
@@ -203,7 +204,7 @@ namespace FEM2A {
         
         void sinus_bump_pb( const std::string& mesh_filename, bool verbose )
         {
-            std::cout << "Solving a sinus bump problem" << std::endl;
+            std::cout << "Solving a sinus bump problem on "<<mesh_filename << std::endl;
             if ( verbose ) {
                 std::cout << " with lots of printed details..." << std::endl;
             }
@@ -263,13 +264,20 @@ namespace FEM2A {
             solution_filename.append("bb");
             save_solution(x, solution_filename);
             
+
+            for(int i ; i<M.nb_vertices();++i)
+            {
+                x[i] -= sin(M_PI*M.get_vertex(i).x)*sin(M_PI*M.get_vertex(i).y);
+            }
+            save_solution(x, solution_filename);
+            
         }
         
         
         
         void neumann_pb( const std::string& mesh_filename, bool verbose )
         {
-            std::cout << "Solving a neumann problem" << std::endl;
+            std::cout << "Solving a neumann problem on "<<mesh_filename << std::endl;
             if ( verbose ) {
                 std::cout << " with lots of printed details..." << std::endl;
             }
@@ -308,17 +316,8 @@ namespace FEM2A {
                 // F
                 assemble_elementary_vector(element, fonctions, quadrat, unit_fct, Fe);
                 local_to_global_vector(M, false,t, Fe, F);
+                
             }       
-            
-            
-            for (int b=0 ; b<M.nb_edges(); ++b)
-            {
-
-                ElementMapping element_1D(M,true,b);
-                assemble_elementary_neumann_vector(element_1D, fonctions_1D, quadrat_1D, sin_fct,Fe);
-                local_to_global_vector(M, true,b, Fe, F);
-            }
-                       
             
             
             // CHOOSE AND APPLY DIRICHLET CONDITIONS
@@ -335,6 +334,19 @@ namespace FEM2A {
             std::cout <<'\n';
             
             
+            // APPLY NEUMANN CONDITIONS
+            for (int b=0 ; b<M.nb_edges(); ++b)
+            {
+
+                ElementMapping element_1D(M,true,b);
+                assemble_elementary_neumann_vector(element_1D, fonctions_1D, quadrat_1D, sin_fct,Fe);
+                local_to_global_vector(M, true,b, Fe, F);
+            }
+                       
+            
+
+            
+            
             
             // SOLVE
             std::vector< double > x(M.nb_vertices(), 0);
@@ -348,6 +360,9 @@ namespace FEM2A {
             }
             std::cout <<'\n';
             
+            
+            
+            std::cout << "CA DEVRAIT ETRE SYMMETRIQUE MAIS CA L EST PAS AU SECOURS\n IL FAUT PTET LIMITER LES BORDS SUR LESQUELS ON APPLIQUE NEUMANN";
             // CREATE SOLUTION FILE
             std::string solution_filename;
             solution_filename.assign(mesh_filename.begin(),mesh_filename.end()-4);
