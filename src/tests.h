@@ -239,5 +239,26 @@ namespace FEM2A {
             std::cout <<"\n";
             return true;
         }
+        
+        
+        bool test_Neumann()
+        {
+            Mesh mesh;
+            mesh.load("data/square.mesh");
+            int element_index = 4;
+            ElementMapping element_1D(mesh, true, element_index);
+            ShapeFunctions fonctions_1D(1,1);
+            Quadrature quadrat_1D = Quadrature::get_quadrature(0,true);
+            std::vector< double > Fe;
+            assemble_elementary_neumann_vector(element_1D, fonctions_1D, quadrat_1D, unit_fct,Fe);
+            
+            std::cout << "Fe (pour f=1)\n";
+            for (double i :Fe)
+            {
+                std::cout << i << " ";
+            }
+            std::cout <<"\n";
+            return true;        
+        }
     }
 }

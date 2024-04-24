@@ -228,7 +228,7 @@ namespace FEM2A {
             det = J.get(0,0)*J.get(1,1) - (J.get(1,0)*J.get(0,1));
             }
         else {
-            det = pow(1/2,(J.get(0,0)*J.get(0,0) + J.get(1,0)*J.get(1,0)));
+            det = pow(1/2,(J.get(0,0)*J.get(0,0) + J.get(0,1)*J.get(0,1)));
             }
         
        //std::cout << "Determinant\n" << det<<"\n"<<std::endl;
@@ -449,8 +449,6 @@ namespace FEM2A {
         double (*neumann)(vertex),
         std::vector< double >& Fe )
     {
-        //std::cout << "compute elementary vector (source term)" << '\n';
-        // TODO
         
         int imax;
         double shape_i;
@@ -458,13 +456,15 @@ namespace FEM2A {
         
         imax = reference_functions_1D.nb_functions();
         Fe.resize(imax);
-        
+
+
+
         for (int i =0; i<imax; ++i)
             {
             Fe[i] =0;
             for(int q = 0; q< quadrature_1D.nb_points(); ++q)
                 {
-                shape_i = reference_functions_1D.evaluate(i,quadrature.point(q));
+                shape_i = reference_functions_1D.evaluate(i,quadrature_1D.point(q));               
                 Fe[i]+= quadrature_1D.weight(q)*neumann(elt_mapping_1D.transform(quadrature_1D.point(q)))* shape_i * elt_mapping_1D.jacobian(quadrature_1D.point(q));
                 }
             }
