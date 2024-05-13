@@ -108,14 +108,14 @@ namespace FEM2A {
             Mesh mesh;
             mesh.load("data/square.mesh");
             int element_index = 4;
-            ElementMapping element(mesh, false, element_index);
+            ElementMapping element(mesh, false, element_index, true);
             ShapeFunctions fonctions(2,1);
             Quadrature quadrat = Quadrature::get_quadrature(6,false);
             DenseMatrix Ke;
             
 
             
-            assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke);
+            assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke, true);
             return true;
         }
         
@@ -134,9 +134,9 @@ namespace FEM2A {
             
             for (int t=0 ; t<mesh.nb_triangles(); ++t)
             {
-                ElementMapping element(mesh, false, t);
-                assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke);
-                local_to_global_matrix(mesh, t, Ke, K);
+                ElementMapping element(mesh, false, t, true);
+                assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke,true);
+                local_to_global_matrix(mesh, t, Ke, K, true);
             }
             
             K.print();

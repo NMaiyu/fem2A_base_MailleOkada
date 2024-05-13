@@ -129,10 +129,11 @@ namespace FEM2A {
     /****************************************************************/
     /* Implementation of ElementMapping */
     /****************************************************************/
+    
     ElementMapping::ElementMapping( const Mesh& M, bool border, int i, bool verbose)
         : border_( border )
     {
-        //std::cout << "[ElementMapping] constructor for element " << i << " ";
+        if(verbose){std::cout << "[ElementMapping] constructor for element " << i << " ";}
         // TODO
         if ( border ) 
         {
@@ -144,7 +145,50 @@ namespace FEM2A {
             
             // Prints the vertices
             if (verbose){ 
-                std::cout<<"__________ \nBorder vertices \nx y\n";
+                std::cout<<"\nBorder vertices \nx y\n";
+                std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
+                std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
+                std::cout <<"\n";
+                }
+        }
+        
+        else 
+        {
+            //std::cout << "(triangle border)\n";
+            
+            // Gets the vertices of the element
+            if (verbose){ 
+                std::cout<<"__________ \nTriangle vertices \nx y\n";
+                vertices_.push_back(M.get_triangle_vertex(i, 0));
+                vertices_.push_back(M.get_triangle_vertex(i,1));
+                vertices_.push_back(M.get_triangle_vertex(i,2));
+                
+            
+                // Prints the vertices
+                std::cout<<"x y\n";
+                std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
+                std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
+                std::cout<<vertices_[2].x<< " "<<vertices_[2].y<< std::endl;
+                std::cout <<"\n";
+                }
+        }
+    }
+    ElementMapping::ElementMapping( const Mesh& M, bool border, int i, bool verbose)
+        : border_( border )
+    {
+        if(verbose){std::cout << "[ElementMapping] constructor for element " << i << " ";}
+        // TODO
+        if ( border ) 
+        {
+            //std::cout << "(edge border)\n";
+            
+            // Gets the vertices of the element
+            vertices_.push_back(M.get_edge_vertex(i, 0));
+            vertices_.push_back(M.get_edge_vertex(i,1));
+            
+            // Prints the vertices
+            if (verbose){ 
+                std::cout<<"\nBorder vertices \nx y\n";
                 std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
                 std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
                 std::cout <<"\n";
@@ -210,18 +254,21 @@ namespace FEM2A {
         }
         // TODO
         DenseMatrix J;
+        
         if(border_){
+            if(verbose){std::cout<<"border"<<std::endl;}
             J.set_size(2,1);
             J.set(0,0,vertices_[1].x - vertices_[0].x);
             J.set(1,0, vertices_[1].y - vertices_[0].y);
         }
         else
         {
+            if(verbose){std::cout<<"triangle"<<std::endl;}
             J.set_size(2,2);
             J.set(0,0,vertices_[1].x - vertices_[0].x);
-            J.set(0,1, vertices_[2].x-vertices_[0].x);
+            J.set(0,1,vertices_[2].x - vertices_[0].x);
             J.set(1,0,vertices_[1].y - vertices_[0].y);
-            J.set(1,1, vertices_[2].y-vertices_[0].y);
+            J.set(1,1,vertices_[2].y - vertices_[0].y);
         }
         
        if(verbose){
@@ -307,7 +354,7 @@ namespace FEM2A {
 
     vec2 ShapeFunctions::evaluate_grad( int i, vertex x_r, bool verbose) const
     {
-        //std::cout << "[ShapeFunctions] evaluate gradient shape function " << i << '\n';
+        if(verbose){std::cout << "\n[ShapeFunctions] evaluate gradient shape function " << i << '\n';}
         // TODO
         vec2 g ;
         
@@ -359,7 +406,7 @@ namespace FEM2A {
         DenseMatrix& Ke,
         bool verbose )
     {
-        //std::cout << "compute elementary matrix" << '\n';
+        if(verbose){std::cout << "\ncompute elementary matrix" << '\n';}
         // TODO
         
         int ijmax;
@@ -381,7 +428,7 @@ namespace FEM2A {
                 keij =0;
                 for(int q = 0; q< quadrature.nb_points(); ++q)
                     {
-                    je_inv = elt_mapping.jacobian_matrix(quadrature.point(q)).invert_2x2().transpose();
+                    je_inv = elt_mapping.jacobian_matrix(quadrature.point(q), verbose).invert_2x2().transpose();
                     nabla_shape_i = reference_functions.evaluate_grad(i,quadrature.point(q));
                     nabla_shape_j = reference_functions.evaluate_grad(j,quadrature.point(q));
                         
@@ -419,9 +466,10 @@ namespace FEM2A {
         const Mesh& M,
         int t,
         const DenseMatrix& Ke,
-        SparseMatrix& K )
+        SparseMatrix& K,
+        bool verbose )
     {
-        //std::cout << "Ke -> K for triangle no." << t << " \n";
+        if(verbose){std::cout << "Ke -> K for triangle no." << t << " \n";}
         int global_i;
         int global_j;
         

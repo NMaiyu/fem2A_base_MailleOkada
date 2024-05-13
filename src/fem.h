@@ -66,7 +66,7 @@ namespace FEM2A {
              *               If false, the element is a triangle.
              * \param i The index of the element in the mesh M
              */
-            ElementMapping( const Mesh& M, bool border, int i , bool verbose=false) ;
+            ElementMapping( const Mesh& M, bool border, int i ,bool verbose=false) ;
 
             /**
              * \brief Transforms a point from the reference element
@@ -180,7 +180,8 @@ namespace FEM2A {
         const Mesh& M,
         int t,
         const DenseMatrix& Ke,
-        SparseMatrix& K ) ;
+        SparseMatrix& K,
+        bool verbose=false ) ;
 
     /**
      * \brief Computes the elementary vector Fe associated to a
