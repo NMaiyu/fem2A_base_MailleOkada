@@ -50,12 +50,18 @@ namespace FEM2A {
 
         double edge_right( vertex v)
         {
-            return floor(v.x);
+            if (std::abs(v.x-1.0) < 0.000001) {
+                return 1;
+            }
+            return -1;
         }
         
         double edge_left( vertex v)
         {
-            return (floor(v.x)-1)*-1;
+            if (std::abs(v.x)<0.0000000001){
+                return 1;
+            }
+            return -1;
         }
         
         
@@ -287,14 +293,15 @@ namespace FEM2A {
             // LOAD MESH AND SET ATTRIBUTES
             Mesh M;
             M.load(mesh_filename);
-            M.set_attribute( unit_fct, 1, true ); // Null Neumann
-            M.set_attribute( edge_right, 0, true ); // Dirichlet
+            M.set_attribute( unit_fct, 0, true ); // Null Neumann
+            M.set_attribute( edge_right, 2, true ); // Dirichlet
+            M.set_attribute(edge_left, 1, true);
             
             // CHOOSE QUADRATURE AND SHAPE FUNCTIONS
             ShapeFunctions fonctions(2,1);
             ShapeFunctions fonctions_1D(1,1);
-            Quadrature quadrat = Quadrature::get_quadrature(0,false);
-            Quadrature quadrat_1D = Quadrature::get_quadrature(0,true);
+            Quadrature quadrat = Quadrature::get_quadrature(2,false);
+            Quadrature quadrat_1D = Quadrature::get_quadrature(2,true);
             
             // CREATE EMPTY K, F
             int t_max;
@@ -319,12 +326,25 @@ namespace FEM2A {
                 
             }       
             
-            
             // CHOOSE AND APPLY DIRICHLET CONDITIONS
-            std::vector< bool > attribute_bool(2, false);
-            attribute_bool[0]=true;
+            std::vector< bool > attribute_bool(3, false);
+            attribute_bool[2]=true;
             std::vector< double > values(M.nb_vertices(),0);
             apply_dirichlet_boundary_conditions(M, attribute_bool, values, K, F);
+            
+            
+            // APPLY NEUMANN CONDITIONS
+            for (int b=0 ; b<M.nb_edges(); ++b)
+            {
+                if (M.get_edge_attribute(b)==1)
+                {
+                    ElementMapping element_1D(M,true,b);
+                    assemble_elementary_neumann_vector(element_1D, fonctions_1D, quadrat_1D, sin_fct,Fe);
+                    std::cout <<"ok"<<std::endl;
+                    local_to_global_vector(M, true,b, Fe, F);
+                }
+            }
+            
             
             std::cout << "F\n";
             for (double i :F)
@@ -332,20 +352,6 @@ namespace FEM2A {
                 std::cout << i << ' ';
             }
             std::cout <<'\n';
-            
-            
-            // APPLY NEUMANN CONDITIONS
-            for (int b=0 ; b<M.nb_edges(); ++b)
-            {
-
-                ElementMapping element_1D(M,true,b);
-                assemble_elementary_neumann_vector(element_1D, fonctions_1D, quadrat_1D, sin_fct,Fe);
-                local_to_global_vector(M, true,b, Fe, F);
-            }
-                       
-            
-
-            
             
             
             // SOLVE

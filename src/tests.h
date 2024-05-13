@@ -76,14 +76,14 @@ namespace FEM2A {
             Mesh mesh;
             mesh.load("data/square.mesh");
             int element_index = 4;
-            ElementMapping element(mesh, false, element_index);
+            ElementMapping element(mesh, false, element_index,true);
             
             vertex point;
             point.x =0.2; 
             point.y = 0.4;
-            element.transform(point);
+            element.transform(point, true);
             
-            element.jacobian(point);
+            element.jacobian(point, true);
              
             return true; 
         }
@@ -98,7 +98,7 @@ namespace FEM2A {
             
             std::cout<<fonctions.nb_functions()<<std::endl;
             std::cout<<fonctions.evaluate(2,point)<<std::endl;
-            fonctions.evaluate_grad(2,point);
+            fonctions.evaluate_grad(2,point, true);
             
             return true;
         }
@@ -220,7 +220,7 @@ namespace FEM2A {
             int t_max;
             t_max = mesh.nb_vertices() * quadrat.nb_points();
             std::cout << t_max<<std::endl;
-            std::vector< double > Fe;
+            std::vector< double > Fe(3,0);
             std::vector< double > F(t_max,0);
                         
             

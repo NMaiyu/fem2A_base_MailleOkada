@@ -34,12 +34,12 @@ void run_tests()
     const bool t_quad = false;
     const bool t_elmapping = false;
     const bool t_shapefunct = false;
-    const bool t_elemM = false;
+    const bool t_elemM = true;
     const bool t_loc_to_glob = false;
     const bool t_bdr_cond = false;
     const bool t_elemV = false;
     const bool t_loc_glob_vector = false;
-    const bool t_elemN = true;
+    const bool t_elemN = false;
 
     if( t_opennl ) test_opennl();
     if( t_lmesh ) Tests::test_load_mesh();

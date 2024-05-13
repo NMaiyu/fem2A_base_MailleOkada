@@ -13,7 +13,7 @@ namespace FEM2A {
     void print( const std::vector<double>& x )
     {
         for ( int i = 0; i < x.size(); ++i ) {
-            //std::cout << x[i] << " ";
+            std::cout << x[i] << " ";
         }
         //std::cout << std::endl;
     }
@@ -84,7 +84,7 @@ namespace FEM2A {
         0.5, 0.7886751345948129
     };
 
-    Quadrature Quadrature::get_quadrature( int order, bool border )
+    Quadrature Quadrature::get_quadrature( int order, bool border)
     {
         double* pts = NULL;
         int nb_pts = 0;
@@ -129,7 +129,7 @@ namespace FEM2A {
     /****************************************************************/
     /* Implementation of ElementMapping */
     /****************************************************************/
-    ElementMapping::ElementMapping( const Mesh& M, bool border, int i )
+    ElementMapping::ElementMapping( const Mesh& M, bool border, int i, bool verbose)
         : border_( border )
     {
         //std::cout << "[ElementMapping] constructor for element " << i << " ";
@@ -143,10 +143,12 @@ namespace FEM2A {
             vertices_.push_back(M.get_edge_vertex(i,1));
             
             // Prints the vertices
-            //std::cout<<"x y\n";
-            //std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
-            //std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
-            //std::cout <<"\n";
+            if (verbose){ 
+                std::cout<<"__________ \nBorder vertices \nx y\n";
+                std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
+                std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
+                std::cout <<"\n";
+                }
         }
         
         else 
@@ -154,22 +156,28 @@ namespace FEM2A {
             //std::cout << "(triangle border)\n";
             
             // Gets the vertices of the element
-            vertices_.push_back(M.get_triangle_vertex(i, 0));
-            vertices_.push_back(M.get_triangle_vertex(i,1));
-            vertices_.push_back(M.get_triangle_vertex(i,2));
+            if (verbose){ 
+                std::cout<<"__________ \nTriangle vertices \nx y\n";
+                vertices_.push_back(M.get_triangle_vertex(i, 0));
+                vertices_.push_back(M.get_triangle_vertex(i,1));
+                vertices_.push_back(M.get_triangle_vertex(i,2));
+                
             
-            // Prints the vertices
-            //std::cout<<"x y\n";
-            //std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
-            //std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
-            //std::cout<<vertices_[2].x<< " "<<vertices_[2].y<< std::endl;
-            //std::cout <<"\n";
+                // Prints the vertices
+                std::cout<<"x y\n";
+                std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
+                std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
+                std::cout<<vertices_[2].x<< " "<<vertices_[2].y<< std::endl;
+                std::cout <<"\n";
+                }
         }
     }
 
-    vertex ElementMapping::transform( vertex x_r ) const
+    vertex ElementMapping::transform( vertex x_r , bool verbose) const
     {
-        //std::cout << "[ElementMapping] transform reference to world space" << '\n';
+        if(verbose){
+        std::cout << "\n[ElementMapping] transform reference to world space" << '\n';
+        }
         // TODO
         vertex r ;
         
@@ -187,21 +195,25 @@ namespace FEM2A {
         
         
         // Prints x_r and r
-        //std::cout << "Reference vertex "<< x_r.x << " "<<x_r.y<<std::endl;
-        //std::cout << "World space vertex "<< r.x << " " << r.y<<"\n"<<std::endl;
+        if(verbose){
+            std::cout << "Reference vertex "<< x_r.x << " "<<x_r.y<<std::endl;
+            std::cout << "World space vertex "<< r.x << " " << r.y<<"\n"<<std::endl;
+            }
         return r ;
     }
 
-    DenseMatrix ElementMapping::jacobian_matrix( vertex x_r ) const
+    DenseMatrix ElementMapping::jacobian_matrix( vertex x_r , bool verbose) const
     {
-        //std::cout << "[ElementMapping] compute jacobian matrix" << '\n';
-        //std::cout << "Reference vertex (xi="<<x_r.x<<", eta="<<x_r.y<<")\n";
+        if(verbose){
+            std::cout << "\n[ElementMapping] compute jacobian matrix" << '\n';
+            std::cout << "Reference vertex (xi="<<x_r.x<<", eta="<<x_r.y<<")\n";
+        }
         // TODO
         DenseMatrix J;
         if(border_){
-            J.set_size(1,2);
+            J.set_size(2,1);
             J.set(0,0,vertices_[1].x - vertices_[0].x);
-            J.set(0,1, vertices_[1].y - vertices_[0].y);
+            J.set(1,0, vertices_[1].y - vertices_[0].y);
         }
         else
         {
@@ -212,26 +224,30 @@ namespace FEM2A {
             J.set(1,1, vertices_[2].y-vertices_[0].y);
         }
         
-       //std::cout << "Matrice jacobienne\n";
-       //std::cout <<J.get(0,0)<<" "<<J.get(0,1)<<" \n"<<J.get(1,0)<<" "<<J.get(1,1)<<"\n"<<std::endl;
+       if(verbose){
+           std::cout << "Matrice jacobienne\n";
+           std::cout <<J.get(0,0)<<" "<<J.get(0,1)<<" \n"<<J.get(1,0)<<" "<<J.get(1,1)<<"\n"<<std::endl;
+       }
        return J ;
     }
 
-    double ElementMapping::jacobian( vertex x_r ) const
+    double ElementMapping::jacobian( vertex x_r , bool verbose) const
     {
-        //std::cout << "[ElementMapping] compute jacobian determinant" << '\n';
+        if(verbose){
+            std::cout << "[ElementMapping] compute jacobian determinant" << '\n';
+        }
         // TODO
         DenseMatrix J;
         J = jacobian_matrix(x_r); 
         double det;
-        if(not border_){
+        if(border_){
             det = J.get(0,0)*J.get(1,1) - (J.get(1,0)*J.get(0,1));
             }
         else {
-            det = pow(1/2,(J.get(0,0)*J.get(0,0) + J.get(0,1)*J.get(0,1)));
+            det = J.det_2x2();
             }
         
-       //std::cout << "Determinant\n" << det<<"\n"<<std::endl;
+       if(verbose){std::cout << "Determinant\n" << det<<"\n"<<std::endl;}
         return det ;
     }
 
@@ -244,6 +260,7 @@ namespace FEM2A {
         //std::cout << "[ShapeFunctions] constructor in dimension " << dim << '\n';
         // TODO
         assert(order==1);
+        assert(dim ==1 or dim ==2);
         
     }
 
@@ -255,16 +272,18 @@ namespace FEM2A {
         return dim_+1 ;
     }
 
-    double ShapeFunctions::evaluate( int i, vertex x_r ) const
+    double ShapeFunctions::evaluate( int i, vertex x_r, bool verbose) const
     {
-        //std::cout << "[ShapeFunctions] evaluate shape function " << i << '\n';
-        //std::cout << "Reference vertex (xi="<<x_r.x<<", eta="<<x_r.y<<")\n";
+        if (verbose){
+            std::cout << "[ShapeFunctions] evaluate shape function " << i << '\n';
+            std::cout << "Reference vertex (xi="<<x_r.x<<", eta="<<x_r.y<<")\n";
+        }
         // TODO
         double nb;
         
         // Pour un edge
         if(dim_==1){
-            if(i ==1){nb = 1-x_r.x;}
+            if(i ==0){nb = 1-x_r.x;}
             else{nb = x_r.x;}
         }
         
@@ -286,14 +305,14 @@ namespace FEM2A {
         return nb ; // should not be reached
     }
 
-    vec2 ShapeFunctions::evaluate_grad( int i, vertex x_r ) const
+    vec2 ShapeFunctions::evaluate_grad( int i, vertex x_r, bool verbose) const
     {
         //std::cout << "[ShapeFunctions] evaluate gradient shape function " << i << '\n';
         // TODO
         vec2 g ;
         
         if(dim_==1){
-            if(i ==1){
+            if(i ==0){
                 g.x = -1;
                 g.y = 0;
                 }
@@ -318,6 +337,7 @@ namespace FEM2A {
             case 2:
                 g.x = 0;
                 g.y = 1;
+                break;
             }
         }
         
@@ -336,7 +356,8 @@ namespace FEM2A {
         const ShapeFunctions& reference_functions,
         const Quadrature& quadrature,
         double (*coefficient)(vertex),
-        DenseMatrix& Ke )
+        DenseMatrix& Ke,
+        bool verbose )
     {
         //std::cout << "compute elementary matrix" << '\n';
         // TODO
@@ -370,21 +391,25 @@ namespace FEM2A {
                     keij+= quadrature.weight(q)*coefficient(elt_mapping.transform(quadrature.point(q)))* dot(nabla_base_i, nabla_base_j) * elt_mapping.jacobian(quadrature.point(q));
                         
 
-                    //std::cout << "Inverse \n";
-                    //std::cout <<je_inv.get(0,0)<<" "<<je_inv.get(0,1)<<" \n"<<je_inv.get(1,0)<<" "<<je_inv.get(1,1)<<"\n"<<std::endl;
+                    if(verbose){
+                        std::cout << "Inverse \n";
+                        std::cout <<je_inv.get(0,0)<<" "<<je_inv.get(0,1)<<" \n"<<je_inv.get(1,0)<<" "<<je_inv.get(1,1)<<"\n"<<std::endl;
+                        }
                     }
                 Ke.set(i,j,keij);
 
                 }
             }
-        //std::cout<< "elementary matrix\n";
-        for (int i =0; i<ijmax; ++i)
-            {
-            for (int j=0 ; j<ijmax; ++j)
+        if(verbose){
+            std::cout<< "elementary matrix\n";
+            for (int i =0; i<ijmax; ++i)
                 {
-                //std::cout<< Ke.get(i,j)<<" ";
+                for (int j=0 ; j<ijmax; ++j)
+                    {
+                    std::cout<< Ke.get(i,j)<<" ";
+                    }
+                std::cout<<std::endl;
                 }
-            //std::cout<<std::endl;
             }
             
     }
@@ -408,7 +433,7 @@ namespace FEM2A {
             {
                 global_j = M.get_triangle_vertex_index(t, j);
                 K.add(global_i,global_j , Ke.get(i,j));
-                K.add(global_j,global_i , Ke.get(i,j));
+
             }
         }
         
@@ -419,9 +444,13 @@ namespace FEM2A {
         const ShapeFunctions& reference_functions,
         const Quadrature& quadrature,
         double (*source)(vertex),
-        std::vector< double >& Fe )
+        std::vector< double >& Fe,
+        bool verbose )
     {
-        //std::cout << "compute elementary vector (source term)" << '\n';
+        if (verbose)
+        {
+        std::cout << "compute elementary vector (source term)" << '\n';
+        }
         // TODO
         
         int imax;
@@ -429,7 +458,8 @@ namespace FEM2A {
         
         
         imax = reference_functions.nb_functions();
-        Fe.resize(imax);
+        Fe.resize(imax,0);
+        std::cout << "create Fe" << '\n';
         
         for (int i =0; i<imax; ++i)
             {
@@ -453,9 +483,8 @@ namespace FEM2A {
         int imax;
         double shape_i;
         
-        
         imax = reference_functions_1D.nb_functions();
-        Fe.resize(imax);
+        Fe.resize(imax,0);
 
 
 
@@ -464,9 +493,10 @@ namespace FEM2A {
             Fe[i] =0;
             for(int q = 0; q< quadrature_1D.nb_points(); ++q)
                 {
-                shape_i = reference_functions_1D.evaluate(i,quadrature_1D.point(q));               
-                Fe[i]+= quadrature_1D.weight(q)*neumann(elt_mapping_1D.transform(quadrature_1D.point(q)))* shape_i * elt_mapping_1D.jacobian(quadrature_1D.point(q));
+                    shape_i = reference_functions_1D.evaluate(i,quadrature_1D.point(q));               
+                    Fe[i]+= quadrature_1D.weight(q)*neumann(elt_mapping_1D.transform(quadrature_1D.point(q)))* shape_i * elt_mapping_1D.jacobian(quadrature_1D.point(q));
                 }
+                
             }
     }
 

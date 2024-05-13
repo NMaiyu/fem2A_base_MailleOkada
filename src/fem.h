@@ -66,7 +66,7 @@ namespace FEM2A {
              *               If false, the element is a triangle.
              * \param i The index of the element in the mesh M
              */
-            ElementMapping( const Mesh& M, bool border, int i ) ;
+            ElementMapping( const Mesh& M, bool border, int i , bool verbose=false) ;
 
             /**
              * \brief Transforms a point from the reference element
@@ -74,14 +74,14 @@ namespace FEM2A {
              * \param x_r Position in the reference element
              * \return the position in the world space
              */
-            vertex transform( vertex x_r ) const ;
+            vertex transform( vertex x_r , bool verbose = false) const ;
 
             /**
              * \brief Computes the jacobian matrix of the mapping.
              * \param x_r Position in the reference space
              * \return the jacobian matrix of the mapping
              */
-            DenseMatrix jacobian_matrix( vertex x_r ) const ;
+            DenseMatrix jacobian_matrix( vertex x_r , bool verbose = false) const ;
 
             /**
              * \brief  Computes the determinant of the jacobian matrix
@@ -89,7 +89,7 @@ namespace FEM2A {
              * \param x_r Position in the reference space
              * \return the determinant of the jacobian matrix
              */
-            double jacobian( vertex x_r ) const ;
+            double jacobian( vertex x_r, bool verbose = false) const ;
 
         private:
             bool border_ ;
@@ -127,7 +127,7 @@ namespace FEM2A {
              * \param x_r Position in the reference space
              * \return the value of the i-th shape function at x_r
              */
-            double evaluate( int i, vertex x_r ) const ;
+            double evaluate( int i, vertex x_r, bool verbose=false) const ;
 
             /**
              * \brief Evaluates the gradient of the i-th shape function at a
@@ -136,7 +136,7 @@ namespace FEM2A {
              * \param x_r Position in the reference space
              * \return the gradient of the i-th shape function at x_r
              */
-            vec2 evaluate_grad( int i, vertex x_r ) const ;
+            vec2 evaluate_grad( int i, vertex x_r, bool verbose=false) const ;
 
         private:
             int dim_ ;
@@ -164,7 +164,8 @@ namespace FEM2A {
         const ShapeFunctions& reference_functions,
         const Quadrature& quadrature,
         double (*coefficient)(vertex),
-        DenseMatrix& Ke ) ;
+        DenseMatrix& Ke,
+        bool verbose=false) ;
 
     /**
      * \brief  Adds the contribution Ke of triangle t to
@@ -199,7 +200,8 @@ namespace FEM2A {
         const ShapeFunctions& reference_functions,
         const Quadrature& quadrature,
         double (*source)(vertex),
-        std::vector< double >& Fe ) ;
+        std::vector< double >& Fe,
+        bool verbose=false ) ;
 
     /**
      * \brief Computes the elementary vector Fe associated to
