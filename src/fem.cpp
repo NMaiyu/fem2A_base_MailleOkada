@@ -130,7 +130,7 @@ namespace FEM2A {
     /* Implementation of ElementMapping */
     /****************************************************************/
     
-    ElementMapping::ElementMapping( const Mesh& M, bool border, int i, bool verbose)
+    ElementMapping::ElementMapping( const Mesh& M, bool border, int i)
         : border_( border )
     {
         if(verbose){std::cout << "[ElementMapping] constructor for element " << i << " ";}
