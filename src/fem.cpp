@@ -133,44 +133,18 @@ namespace FEM2A {
     ElementMapping::ElementMapping( const Mesh& M, bool border, int i)
         : border_( border )
     {
-        if(verbose){std::cout << "[ElementMapping] constructor for element " << i << " ";}
-        // TODO
         if ( border ) 
         {
-            //std::cout << "(edge border)\n";
-            
             // Gets the vertices of the element
             vertices_.push_back(M.get_edge_vertex(i, 0));
             vertices_.push_back(M.get_edge_vertex(i,1));
-            
-            // Prints the vertices
-            if (verbose){ 
-                std::cout<<"\nBorder vertices \nx y\n";
-                std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
-                std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
-                std::cout <<"\n";
-                }
         }
         
         else 
         {
-            //std::cout << "(triangle border)\n";
-            
-            // Gets the vertices of the element
-            if (verbose){ 
-                std::cout<<"__________ \nTriangle vertices \nx y\n";
-                vertices_.push_back(M.get_triangle_vertex(i, 0));
-                vertices_.push_back(M.get_triangle_vertex(i,1));
-                vertices_.push_back(M.get_triangle_vertex(i,2));
-                
-            
-                // Prints the vertices
-                std::cout<<"x y\n";
-                std::cout<<vertices_[0].x<< " "<<vertices_[0].y<< std::endl;
-                std::cout<<vertices_[1].x<< " "<<vertices_[1].y<< std::endl;
-                std::cout<<vertices_[2].x<< " "<<vertices_[2].y<< std::endl;
-                std::cout <<"\n";
-                }
+            vertices_.push_back(M.get_triangle_vertex(i, 0));
+            vertices_.push_back(M.get_triangle_vertex(i,1));
+            vertices_.push_back(M.get_triangle_vertex(i,2));
         }
     }
     ElementMapping::ElementMapping( const Mesh& M, bool border, int i, bool verbose)
@@ -256,7 +230,6 @@ namespace FEM2A {
         DenseMatrix J;
         
         if(border_){
-            if(verbose){std::cout<<"border"<<std::endl;}
             J.set_size(2,1);
             J.set(0,0,vertices_[1].x - vertices_[0].x);
             J.set(1,0, vertices_[1].y - vertices_[0].y);
@@ -288,7 +261,7 @@ namespace FEM2A {
         J = jacobian_matrix(x_r); 
         double det;
         if(border_){
-            det = J.get(0,0)*J.get(1,1) - (J.get(1,0)*J.get(0,1));
+            det = std::sqrt(J.get(0,0)*J.get(0,0) + J.get(1,0)*J.get(1,0));
             }
         else {
             det = J.det_2x2();
@@ -496,9 +469,7 @@ namespace FEM2A {
         bool verbose )
     {
         if (verbose)
-        {
-        std::cout << "compute elementary vector (source term)" << '\n';
-        }
+        {std::cout << "\ncompute elementary vector (source term)" << '\n';}
         // TODO
         
         int imax;
@@ -507,7 +478,7 @@ namespace FEM2A {
         
         imax = reference_functions.nb_functions();
         Fe.resize(imax,0);
-        std::cout << "create Fe" << '\n';
+        if(verbose){std::cout << "create Fe" << '\n';}
         
         for (int i =0; i<imax; ++i)
             {
@@ -525,8 +496,13 @@ namespace FEM2A {
         const ShapeFunctions& reference_functions_1D,
         const Quadrature& quadrature_1D,
         double (*neumann)(vertex),
-        std::vector< double >& Fe )
+        std::vector< double >& Fe,
+        bool verbose )
     {
+        if (verbose)
+        {
+        std::cout << "\ncompute elementary neumann vector" << '\n';
+        }
         
         int imax;
         double shape_i;
@@ -534,15 +510,16 @@ namespace FEM2A {
         imax = reference_functions_1D.nb_functions();
         Fe.resize(imax,0);
 
-
-
         for (int i =0; i<imax; ++i)
             {
             Fe[i] =0;
             for(int q = 0; q< quadrature_1D.nb_points(); ++q)
                 {
-                    shape_i = reference_functions_1D.evaluate(i,quadrature_1D.point(q));               
-                    Fe[i]+= quadrature_1D.weight(q)*neumann(elt_mapping_1D.transform(quadrature_1D.point(q)))* shape_i * elt_mapping_1D.jacobian(quadrature_1D.point(q));
+                    vertex point_q = quadrature_1D.point(q);
+                    shape_i = reference_functions_1D.evaluate(i,point_q);
+                    double w = quadrature_1D.weight(q);
+                    Fe[i]+= w*neumann(elt_mapping_1D.transform(point_q))* shape_i * elt_mapping_1D.jacobian(point_q, verbose);
+                    std::cout<<"Fe_i\n";
                 }
                 
             }
@@ -553,9 +530,10 @@ namespace FEM2A {
         bool border,
         int i,
         std::vector< double >& Fe,
-        std::vector< double >& F )
+        std::vector< double >& F,
+        bool verbose)
     {
-        //std::cout << "Fe -> F" << '\n';
+        if(verbose){std::cout << "Fe -> F no." << i << " \n";}
 
         int global_j;
         F.resize(M.nb_vertices());
@@ -575,12 +553,12 @@ namespace FEM2A {
         const std::vector< bool >& attribute_is_dirichlet, /* size: nb of attributes */
         const std::vector< double >& values, /* size: nb of DOFs */
         SparseMatrix& K,
-        std::vector< double >& F )
+        std::vector< double >& F, 
+        bool verbose)
     {
-        //std::cout << "apply dirichlet boundary conditions" << '\n';
-        // TODO
-        int P = 10000;
-        bool*passage = new bool[M.nb_vertices()]{false};
+        if(verbose){std::cout << "\napply dirichlet boundary conditions" << '\n';}
+        double P = 10000.;
+        std::vector< bool > passage(values.size(), false);
         
         for(int i= 0 ; i<M.nb_edges();++i)
         {
@@ -601,7 +579,6 @@ namespace FEM2A {
                 }    
             }
         }
-        delete passage;
     }
 
     void solve_poisson_problem(

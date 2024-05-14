@@ -36,10 +36,10 @@ void run_tests()
     const bool t_shapefunct = false;
     const bool t_elemM = false;
     const bool t_loc_to_glob = false;
-    const bool t_bdr_cond = true;
+    const bool t_bdr_cond = false;
     const bool t_elemV = false;
     const bool t_loc_glob_vector = false;
-    const bool t_elemN = false;
+    const bool t_elemN = true;
 
     if( t_opennl ) test_opennl();
     if( t_lmesh ) Tests::test_load_mesh();
@@ -60,8 +60,9 @@ void run_simu()
 
     const bool simu_pure_dirichlet = false;
     const bool simu_source_dirichlet = false ;
-    const bool simu_sinus_bump=false; 
-    const bool simu_neumann=true;
+    const bool simu_sinus_bump=false;
+    const bool simu_sinus_bump_error=true; 
+    const bool simu_neumann=false;
 
     const bool verbose = flag_is_used( "-v", arguments )
         || flag_is_used( "--verbose", arguments );
@@ -72,8 +73,11 @@ void run_simu()
     if( simu_source_dirichlet){
         Simu::source_dirichlet_pb("data/square.mesh", verbose);
     }
+    if( simu_sinus_bump_error){
+        Simu::sinus_bump_pb("data/square.mesh",true,verbose);
+    }
     if( simu_sinus_bump){
-        Simu::sinus_bump_pb("data/square_fine.mesh",verbose);
+        Simu::sinus_bump_pb("data/square.mesh",false,verbose);
     }
     if( simu_neumann){
         Simu::neumann_pb("data/square.mesh", verbose);

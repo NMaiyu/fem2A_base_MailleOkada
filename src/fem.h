@@ -223,7 +223,8 @@ namespace FEM2A {
         const ShapeFunctions& reference_functions_1D,
         const Quadrature& quadrature_1D,
         double (*neumann)(vertex),
-        std::vector< double >& Fe ) ;
+        std::vector< double >& Fe ,
+        bool verbose=false ) ;
 
     /**
      * \brief  Adds the contribution Fe of element i (which is a
@@ -241,7 +242,8 @@ namespace FEM2A {
         bool border,
         int i,
         std::vector< double >& Fe,
-        std::vector< double >& F ) ;
+        std::vector< double >& F,
+        bool verbose=false ) ;
 
     /**
      * \brief  Modifies the linear system with the penalty method to
@@ -260,7 +262,8 @@ namespace FEM2A {
         const std::vector< bool >& attribute_is_dirichlet, /* size: nb of attributes */
         const std::vector< double >& values, /* size: nb of DOFs */
         SparseMatrix& K,
-        std::vector< double >& F ) ;
+        std::vector< double >& F,
+        bool verbose=false) ;
 
     /**
      * \brief Genereal function to solve a Poisson problem with the

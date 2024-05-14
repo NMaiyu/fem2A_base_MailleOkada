@@ -164,7 +164,7 @@ namespace FEM2A {
             {
                 ElementMapping element(M, false, t);
                 assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke);
-                local_to_global_matrix(M, t, Ke, K);
+                local_to_global_matrix(M, t, Ke, K, true);
             }
             
             std::vector< double > F(M.nb_vertices(), 1);
@@ -177,11 +177,12 @@ namespace FEM2A {
                 values[i] = M.get_vertex(i).x + M.get_vertex(i).y; 
             }
             
-            apply_dirichlet_boundary_conditions(M, attribute_bool, values, K, F);
+            apply_dirichlet_boundary_conditions(M, attribute_bool, values, K, F,true);
             
             std::vector< double > x(M.nb_vertices(), 0);
             solve(K,F, x);
             
+            std::cout<<"\nU:\n";
             for (double i :x)
             {
                 std::cout << i << ' ';
@@ -200,7 +201,7 @@ namespace FEM2A {
             ShapeFunctions fonctions(2,1);
             Quadrature quadrat = Quadrature::get_quadrature(6,false);
             std::vector< double > Fe;
-            assemble_elementary_vector(element, fonctions, quadrat, unit_fct, Fe);
+            assemble_elementary_vector(element, fonctions, quadrat, unit_fct, Fe, true);
             
             std::cout << "Fe (pour f=1)\n";
             for (double i :Fe)
@@ -228,10 +229,10 @@ namespace FEM2A {
             {
                 ElementMapping element(mesh, false, t);
                 assemble_elementary_vector(element, fonctions, quadrat, unit_fct, Fe);
-                local_to_global_vector(mesh, false,t, Fe, F);
+                local_to_global_vector(mesh, false,t, Fe, F, true);
             }
             
-            std::cout << "F (pour f=1)\n";
+            std::cout << "\nF (pour f=1)\n";
             for (double i :F)
             {
                 std::cout << i << " ";
