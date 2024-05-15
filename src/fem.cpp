@@ -572,6 +572,8 @@ namespace FEM2A {
         }
     }
 
+
+
     void solve_poisson_problem(
             const Mesh& M,
             double (*diffusion_coef)(vertex),
@@ -579,10 +581,87 @@ namespace FEM2A {
             double (*dirichlet_fct)(vertex),
             double (*neumann_fct)(vertex),
             std::vector<double>& solution,
-            int verbose )
+            bool verbose)
     {
-        std::cout << "solve poisson problem" << '\n';
-        // TODO
-    }
 
+        std::cout << "solve poisson problem" << '\n';
+            
+        std::cout <<"\n[CREATING QUADRATURE AND SHAPE FUNCTIONS]\n";
+        ShapeFunctions fonctions(2,1);
+        ShapeFunctions fonctions_1D(1,1);
+        Quadrature quadrat = Quadrature::get_quadrature(2,false);
+        Quadrature quadrat_1D = Quadrature::get_quadrature(2,true);
+        
+        std::cout <<"\n[CREATE EMPTY K, F]\n";
+        int t_max;
+        t_max = M.nb_vertices() ;
+        SparseMatrix K(t_max);
+        std::vector< double > F(t_max,0);
+        
+        std::cout<<"\n[CREATE MATRIX K AND VECTOR F]\n";
+        for (int t=0 ; t<M.nb_triangles(); ++t)
+        {
+            ElementMapping element(M, false, t);
+            // K
+            DenseMatrix Ke ;
+            assemble_elementary_matrix(element, fonctions, quadrat, diffusion_coef, Ke, verbose);
+            local_to_global_matrix(M, t, Ke, K, verbose);
+            
+            // F
+            std::vector< double > Fe;
+            assemble_elementary_vector(element, fonctions, quadrat, source_term, Fe, verbose);
+            local_to_global_vector(M, false,t, Fe, F, verbose);
+        }
+        
+        std::cout<<"\n[APPLY DIRICHLET CONDITIONS]\n";
+        std::vector< bool > attribute_bool(2, false);
+        attribute_bool[1]=true;
+        std::vector< double > values(M.nb_vertices());
+        for(int i=0;i<M.nb_vertices(); i++)
+        {
+            values[i] = dirichlet_fct(M.get_vertex(i));
+        }
+        apply_dirichlet_boundary_conditions(M, attribute_bool, values, K, F, verbose);
+        
+        
+        std::cout<<"\n[APPLY NEUMANN CONDITIONS]\n";
+        for (int b=0 ; b<M.nb_edges(); ++b)
+        {
+            if (M.get_edge_attribute(b)==2)
+            {
+                ElementMapping element_1D(M,true,b);
+                std::vector< double > Fe;
+                assemble_elementary_neumann_vector(element_1D, fonctions_1D, quadrat_1D, neumann_fct,Fe, verbose);
+                local_to_global_vector(M, true,b, Fe, F, verbose);
+            }
+        }
+        
+        
+        if(verbose)
+        {
+            std::cout << "\nF\n";
+            for (double i :F)
+            {
+                std::cout << i << ' ';
+            }
+            std::cout <<'\n';
+        }
+        
+
+        std::cout<<"\n[SOLVING PROBLEM]\n";
+        solve(K,F, solution);
+        
+        // PRINT SOLUTION
+        if(verbose)
+        {   
+            std::cout<<"\n[SOLUTION]\n";
+            for (double sol:solution)
+            {
+                std::cout << sol << ' ';
+            }
+            std::cout <<'\n';
+        }
+
+    }
+    
 }

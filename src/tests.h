@@ -11,13 +11,57 @@
 #include <algorithm>
 #include <stdlib.h>
 
-double unit_fct( FEM2A::vertex v )
-{
-    return 1.;
-}
+
+
+
+
+
 
 namespace FEM2A {
     namespace Tests {
+    
+        //#################################
+        //  Useful functions
+        //#################################
+
+        double unit_fct( FEM2A::vertex v )
+        {
+            return 1.;
+        }
+
+
+        double zero_fct( FEM2A::vertex v )
+        {
+            return 0.;
+        }
+
+
+        double sin_fct(FEM2A::vertex v)
+        {
+            return sin(M_PI * v.y);
+        }
+
+        double edge_right( FEM2A::vertex v)
+        {
+            // returns 1 if x=1
+            if (std::abs(v.x-1.0) < 0.000001) {
+                return 1;
+            }
+            return -1;
+        }
+
+        double edge_left( FEM2A::vertex v)
+        {
+            // returns 1 if x=0 
+            if (std::abs(v.x)<0.0000000001){
+                return 1;
+            }
+            return -1;
+        }
+
+        //#################################
+        //  Tests
+        //#################################
 
         bool test_load_mesh()
         {
@@ -305,5 +349,29 @@ namespace FEM2A {
             
             return true;        
         }
+        
+        bool test_Poisson()
+        {
+            std::cout<<"\n[Test Poisson Problem Solver]"<<std::endl;
+            Mesh M;
+            std::string mesh_filename = "data/square.mesh";
+            M.load("data/square.mesh");
+            M.set_attribute( unit_fct, 0, true ); // Null Neumann
+            M.set_attribute( edge_right, 1, true ); // Dirichlet
+            M.set_attribute( edge_left, 2, true); // Neumann
+            
+            std::vector<double> solution(M.nb_vertices());
+                        
+            solve_poisson_problem(M, unit_fct , unit_fct , unit_fct , unit_fct , solution);
+            
+            // CREATE SOLUTION FILE
+            std::string solution_filename;
+            solution_filename.assign(mesh_filename.begin(),mesh_filename.end()-4);
+            solution_filename.append("bb");
+            save_solution(solution, solution_filename);   
+            
+            return true;
+        }
+        
     }
 }

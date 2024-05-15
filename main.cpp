@@ -40,6 +40,7 @@ void run_tests()
     const bool t_elemV = true;
     const bool t_loc_glob_vector = true;
     const bool t_elemN = true;
+    const bool t_poisson = true;
 
     if( t_opennl ) test_opennl();
     if( t_lmesh ) Tests::test_load_mesh();
@@ -53,6 +54,7 @@ void run_tests()
     if (t_elemV) Tests::test_ElementaryVector();
     if (t_loc_glob_vector) Tests::test_LocToGlobVector();
     if (t_elemN) Tests::test_Neumann();
+    if (t_poisson) Tests::test_Poisson();
 }
 
 void run_simu()
@@ -86,6 +88,8 @@ void run_simu()
     if( simu_mug){
         Simu::mug_pb("data/mug_0_2.mesh", verbose);
     }
+    
+    
 }
 
 int main( int argc, const char * argv[] )

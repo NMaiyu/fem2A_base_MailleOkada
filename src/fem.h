@@ -290,7 +290,7 @@ namespace FEM2A {
             double (*dirichlet_fct)(vertex),
             double (*neumann_fct)(vertex),
             std::vector<double>& solution,
-            bool verbose ) ;
+            bool verbose =false) ;
 
 }
 
