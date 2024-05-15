@@ -175,7 +175,7 @@ namespace FEM2A {
             
             // Gets the vertices of the element
             if (verbose){ 
-                std::cout<<"__________ \nTriangle vertices \nx y\n";
+                std::cout<<"\nTriangle vertices \n";
                 vertices_.push_back(M.get_triangle_vertex(i, 0));
                 vertices_.push_back(M.get_triangle_vertex(i,1));
                 vertices_.push_back(M.get_triangle_vertex(i,2));
@@ -327,7 +327,10 @@ namespace FEM2A {
 
     vec2 ShapeFunctions::evaluate_grad( int i, vertex x_r, bool verbose) const
     {
-        if(verbose){std::cout << "\n[ShapeFunctions] evaluate gradient shape function " << i << '\n';}
+        if(verbose){
+            std::cout << "[ShapeFunctions] evaluate gradient shape function " << i << '\n';
+            std::cout << "Reference vertex (xi="<<x_r.x<<", eta="<<x_r.y<<")\n";
+            }
         // TODO
         vec2 g ;
         
@@ -380,7 +383,6 @@ namespace FEM2A {
         bool verbose )
     {
         if(verbose){std::cout << "\ncompute elementary matrix" << '\n';}
-        // TODO
         
         int ijmax;
         DenseMatrix je_inv;
@@ -401,7 +403,7 @@ namespace FEM2A {
                 keij =0;
                 for(int q = 0; q< quadrature.nb_points(); ++q)
                     {
-                    je_inv = elt_mapping.jacobian_matrix(quadrature.point(q), verbose).invert_2x2().transpose();
+                    je_inv = elt_mapping.jacobian_matrix(quadrature.point(q)).invert_2x2().transpose();
                     nabla_shape_i = reference_functions.evaluate_grad(i,quadrature.point(q));
                     nabla_shape_j = reference_functions.evaluate_grad(j,quadrature.point(q));
                         
@@ -410,25 +412,9 @@ namespace FEM2A {
                         
                     keij+= quadrature.weight(q)*coefficient(elt_mapping.transform(quadrature.point(q)))* dot(nabla_base_i, nabla_base_j) * elt_mapping.jacobian(quadrature.point(q));
                         
-
-                    if(verbose){
-                        std::cout << "Inverse \n";
-                        std::cout <<je_inv.get(0,0)<<" "<<je_inv.get(0,1)<<" \n"<<je_inv.get(1,0)<<" "<<je_inv.get(1,1)<<"\n"<<std::endl;
-                        }
                     }
                 Ke.set(i,j,keij);
 
-                }
-            }
-        if(verbose){
-            std::cout<< "elementary matrix\n";
-            for (int i =0; i<ijmax; ++i)
-                {
-                for (int j=0 ; j<ijmax; ++j)
-                    {
-                    std::cout<< Ke.get(i,j)<<" ";
-                    }
-                std::cout<<std::endl;
                 }
             }
             
@@ -454,6 +440,10 @@ namespace FEM2A {
             {
                 global_j = M.get_triangle_vertex_index(t, j);
                 K.add(global_i,global_j , Ke.get(i,j));
+                if(verbose)
+                {
+                    std::cout<<"Le point de Ke en ("<< i <<","<<j<<") correspond à ("<<global_i<<","<<global_j<<") dans K" <<std::endl;
+                }
 
             }
         }
@@ -509,6 +499,7 @@ namespace FEM2A {
         
         imax = reference_functions_1D.nb_functions();
         Fe.resize(imax,0);
+        if(verbose){std::cout << "create Fe" << '\n';}
 
         for (int i =0; i<imax; ++i)
             {
@@ -519,7 +510,6 @@ namespace FEM2A {
                     shape_i = reference_functions_1D.evaluate(i,point_q);
                     double w = quadrature_1D.weight(q);
                     Fe[i]+= w*neumann(elt_mapping_1D.transform(point_q))* shape_i * elt_mapping_1D.jacobian(point_q, verbose);
-                    std::cout<<"Fe_i\n";
                 }
                 
             }
@@ -543,6 +533,7 @@ namespace FEM2A {
         {
             if (not border) {global_j = M.get_triangle_vertex_index(i, j);}
             else {global_j = M.get_edge_vertex_index(i, j);}
+            if(verbose){std::cout << "Numero global du point " << j<< " : "<< global_j<<std::endl;}
             F[global_j]+=Fe[j];
         }
         

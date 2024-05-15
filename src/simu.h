@@ -117,18 +117,22 @@ namespace FEM2A {
             
             
             // PRINT SOLUTION
-            std::cout<<"Vector x \n";
-            for (double i :x)
-            {
-                std::cout << i << ' ';
-            }
             
-            std::cout<<"Vector F \n";
-            for (double i :F)
+            if(verbose)
             {
-                std::cout << i << ' ';
-            }            
-            std::cout <<'\n';
+                std::cout<<"Vector x \n";
+                for (double i :x)
+                {
+                    std::cout << i << ' ';
+                }
+                
+                std::cout<<"Vector F \n";
+                for (double i :F)
+                {
+                    std::cout << i << ' ';
+                }            
+                std::cout <<'\n';
+            }
             
             // CREATE SOLUTION FILE
             std::string solution_filename;
@@ -189,12 +193,15 @@ namespace FEM2A {
             solve(K,F, x);
             
             // PRINT SOLUTION
-            std::cout<<"Vector x \n";
-            for (double i :x)
+            if(verbose)
             {
-                std::cout << i << ' ';
+                std::cout<<"Vector x \n";
+                for (double i :x)
+                {
+                    std::cout << i << ' ';
+                }
+                std::cout <<'\n';
             }
-            std::cout <<'\n';
             
             // CREATE SOLUTION FILE
             std::string solution_filename;
@@ -219,7 +226,7 @@ namespace FEM2A {
             
             // CHOOSE QUADRATURE AND SHAPE FUNCTIONS
             ShapeFunctions fonctions(2,1);
-            Quadrature quadrat = Quadrature::get_quadrature(0,false);
+            Quadrature quadrat = Quadrature::get_quadrature(2,false);
             
             // CREATE EMPTY K, F
             int t_max;
@@ -254,20 +261,23 @@ namespace FEM2A {
             solve(K,F, x);
             
             // PRINT SOLUTION
-            std::cout<<"Vector x \n";
-            for (double i :x)
-            {
-                std::cout << i << ' ';
-            }
-            std::cout <<'\n';
             
+            if(verbose)
+            {
+                std::cout<<"Vector x \n";
+                for (double i :x)
+                {
+                    std::cout << i << ' ';
+                }
+                std::cout <<'\n';
+            }
 
             // RETURN ERROR
             if(error){
                 std::vector< double > err_x(M.nb_vertices(),0);
-                for(int i ; i<M.nb_vertices();++i)
+                for(int i=0 ; i<M.nb_vertices();++i)
                 {
-                    x[i] = x[i] - sin(M_PI*M.get_vertex(i).x)*sin(M_PI*M.get_vertex(i).y);
+                    x[i] =std::abs( x[i] - sin(M_PI * M.get_vertex(i).x)*sin(M_PI*M.get_vertex(i).y));
                 }
             }
             
@@ -340,32 +350,34 @@ namespace FEM2A {
                     ElementMapping element_1D(M,true,b);
                     std::vector< double > Fe;
                     assemble_elementary_neumann_vector(element_1D, fonctions_1D, quadrat_1D, sin_fct,Fe, verbose);
-                    std::cout <<"ok"<<std::endl;
                     local_to_global_vector(M, true,b, Fe, F, verbose);
                 }
             }
             
-            
-            std::cout << "F\n";
-            for (double i :F)
+            if(verbose)
             {
-                std::cout << i << ' ';
+                std::cout << "F\n";
+                for (double i :F)
+                {
+                    std::cout << i << ' ';
+                }
+                std::cout <<'\n';
             }
-            std::cout <<'\n';
-            
             
             // SOLVE
             std::vector< double > x(M.nb_vertices(), 0);
             solve(K,F, x);
             
             // PRINT SOLUTION
-            std::cout<<"Vector x \n";
-            for (double i :x)
+            if(verbose)
             {
-                std::cout << i << ' ';
+                std::cout<<"Vector x \n";
+                for (double i :x)
+                {
+                    std::cout << i << ' ';
+                }
+                std::cout <<'\n';
             }
-            std::cout <<'\n';
-            
 
             // CREATE SOLUTION FILE
             std::string solution_filename;

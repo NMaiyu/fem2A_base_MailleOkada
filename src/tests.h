@@ -59,7 +59,7 @@ namespace FEM2A {
         bool test_quadrature()
         {
             // Creation de la quadrature d'ordre 2 dans un triangle
-            std::cout <<"QUADRATURE TEST\n";
+            std::cout<<"\n[Test Quadrature]"<<std::endl;
             Quadrature quadrat_test = Quadrature::get_quadrature(2);
             
             // Calcul de l'integrale sur le triangle
@@ -73,9 +73,11 @@ namespace FEM2A {
         
         bool test_elementMapping()
         {
+            std::cout<<"\n[Test Element Mapping]"<<std::endl;
             Mesh mesh;
             mesh.load("data/square.mesh");
             int element_index = 4;
+            ElementMapping element_1D(mesh, true, element_index,true);
             ElementMapping element(mesh, false, element_index,true);
             
             vertex point;
@@ -90,14 +92,15 @@ namespace FEM2A {
         
         bool test_ShapeFunction()
         {
+            std::cout<<"\n[Test Shape Functions]"<<std::endl;
             ShapeFunctions fonctions(2,1);
             
             vertex point;
             point.x =0.2; 
             point.y = 0.4;
             
-            std::cout<<fonctions.nb_functions()<<std::endl;
-            std::cout<<fonctions.evaluate(2,point)<<std::endl;
+            std::cout<<"Nombre de fonctions en dim2, ordre1 "<<fonctions.nb_functions()<<std::endl;
+            std::cout<<fonctions.evaluate(2,point, true)<<std::endl;
             fonctions.evaluate_grad(2,point, true);
             
             return true;
@@ -105,40 +108,62 @@ namespace FEM2A {
         
         bool test_ElementaryMatrix()
         {
+            std::cout<<"\n[Test Elementary Matrix]"<<std::endl;
             Mesh mesh;
             mesh.load("data/square.mesh");
             int element_index = 4;
-            ElementMapping element(mesh, false, element_index, true);
+            ElementMapping element(mesh, false, element_index);
             ShapeFunctions fonctions(2,1);
             Quadrature quadrat = Quadrature::get_quadrature(6,false);
             DenseMatrix Ke;
             
-
-            
             assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke, true);
+            
+            std::cout << "Ke (pour k=1), "<< "pour le triangle "<< element_index <<std::endl;
+
+            for (int i =0; i<fonctions.nb_functions(); ++i)
+                {
+                for (int j=0 ; j<fonctions.nb_functions(); ++j)
+                    {
+                    std::cout<< Ke.get(i,j)<<" ";
+                    }
+                std::cout<<std::endl;
+                }
+
             return true;
         }
         
         bool test_LocalToGlobal()
         {           
+            std::cout<<"\n[Test Assemble Matrix]"<<std::endl;
             Mesh mesh;
             mesh.load("data/square.mesh");
             ShapeFunctions fonctions(2,1);
             Quadrature quadrat = Quadrature::get_quadrature(0,false);
             int t_max;
             t_max = mesh.nb_vertices() * quadrat.nb_points();
-            std::cout << t_max<<std::endl;
             DenseMatrix Ke ;
             SparseMatrix K(t_max);
+            int element_index = 4;
                         
             
             for (int t=0 ; t<mesh.nb_triangles(); ++t)
             {
-                ElementMapping element(mesh, false, t, true);
-                assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke,true);
-                local_to_global_matrix(mesh, t, Ke, K, true);
+                ElementMapping element(mesh, false, t);
+                if(t==element_index)
+                {
+                   assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke,false);
+                   local_to_global_matrix(mesh, t, Ke, K, true);
+                }
+                else
+                {
+                    assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke,false);
+                    local_to_global_matrix(mesh, t, Ke, K, false);
+                }
             }
             
+            
+            std::cout << "\nK\n";
             K.print();
             
             
@@ -147,6 +172,7 @@ namespace FEM2A {
         
         bool test_BdrConditions()
         {
+            std::cout<<"\n[Test Apply Dirichlet Conditions]"<<std::endl;
             Mesh M;
             M.load("data/square.mesh");
             
@@ -164,7 +190,7 @@ namespace FEM2A {
             {
                 ElementMapping element(M, false, t);
                 assemble_elementary_matrix(element, fonctions, quadrat, unit_fct, Ke);
-                local_to_global_matrix(M, t, Ke, K, true);
+                local_to_global_matrix(M, t, Ke, K, false);
             }
             
             std::vector< double > F(M.nb_vertices(), 1);
@@ -177,7 +203,7 @@ namespace FEM2A {
                 values[i] = M.get_vertex(i).x + M.get_vertex(i).y; 
             }
             
-            apply_dirichlet_boundary_conditions(M, attribute_bool, values, K, F,true);
+            apply_dirichlet_boundary_conditions(M, attribute_bool, values, K, F,false);
             
             std::vector< double > x(M.nb_vertices(), 0);
             solve(K,F, x);
@@ -194,6 +220,7 @@ namespace FEM2A {
         
         bool test_ElementaryVector()
         {
+            std::cout<<"\n[Test Elementary Vector]"<<std::endl;
             Mesh mesh;
             mesh.load("data/square.mesh");
             int element_index = 4;
@@ -203,7 +230,7 @@ namespace FEM2A {
             std::vector< double > Fe;
             assemble_elementary_vector(element, fonctions, quadrat, unit_fct, Fe, true);
             
-            std::cout << "Fe (pour f=1)\n";
+            std::cout << "Fe (pour f=1), "<< "pour le triangle "<< element_index <<std::endl;
             for (double i :Fe)
             {
                 std::cout << i << " ";
@@ -214,13 +241,14 @@ namespace FEM2A {
         
         bool test_LocToGlobVector()
         {
+            std::cout <<"\n[Test Assemble Vector]"<<std::endl;
             Mesh mesh;
             mesh.load("data/square.mesh");
+            int element_index = 4;
             ShapeFunctions fonctions(2,1);
             Quadrature quadrat = Quadrature::get_quadrature(0,false);
             int t_max;
             t_max = mesh.nb_vertices() * quadrat.nb_points();
-            std::cout << t_max<<std::endl;
             std::vector< double > Fe(3,0);
             std::vector< double > F(t_max,0);
                         
@@ -228,15 +256,25 @@ namespace FEM2A {
             for (int t=0 ; t<mesh.nb_triangles(); ++t)
             {
                 ElementMapping element(mesh, false, t);
-                assemble_elementary_vector(element, fonctions, quadrat, unit_fct, Fe);
-                local_to_global_vector(mesh, false,t, Fe, F, true);
+                if(t==4)
+                {
+                    assemble_elementary_vector(element, fonctions, quadrat, unit_fct, Fe, true);
+                    local_to_global_vector(mesh, false,t, Fe, F, true);
+                }
+                else
+                {
+                    assemble_elementary_vector(element, fonctions, quadrat, unit_fct, Fe);
+                    local_to_global_vector(mesh, false,t, Fe, F);
+                }
             }
             
-            std::cout << "\nF (pour f=1)\n";
+            std::cout << "\nF (pour f=1)"<<std::endl;
             for (double i :F)
             {
                 std::cout << i << " ";
             }
+            
+
             std::cout <<"\n";
             return true;
         }
@@ -244,21 +282,27 @@ namespace FEM2A {
         
         bool test_Neumann()
         {
+            std::cout<<"\n[Test Neumann Conditions]"<<std::endl;
             Mesh mesh;
             mesh.load("data/square.mesh");
             int element_index = 4;
             ElementMapping element_1D(mesh, true, element_index);
             ShapeFunctions fonctions_1D(1,1);
             Quadrature quadrat_1D = Quadrature::get_quadrature(0,true);
+            Quadrature quadrat = Quadrature::get_quadrature(0,false);
             std::vector< double > Fe;
+            std::vector< double > F(mesh.nb_vertices() * quadrat.nb_points(),0);
             assemble_elementary_neumann_vector(element_1D, fonctions_1D, quadrat_1D, unit_fct,Fe);
             
-            std::cout << "Fe (pour f=1)\n";
+            std::cout << "Fe (pour f=1), "<< "pour le bord "<< element_index <<std::endl;
             for (double i :Fe)
             {
                 std::cout << i << " ";
             }
             std::cout <<"\n";
+            
+            local_to_global_vector(mesh, true,element_index, Fe, F, true);
+            
             return true;        
         }
     }
