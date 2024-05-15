@@ -360,9 +360,11 @@ namespace FEM2A {
             M.set_attribute( edge_right, 1, true ); // Dirichlet
             M.set_attribute( edge_left, 2, true); // Neumann
             
+            std::cout << "solving problem on " << mesh_filename<<std::endl;
+            
             std::vector<double> solution(M.nb_vertices());
                         
-            solve_poisson_problem(M, unit_fct , unit_fct , unit_fct , unit_fct , solution);
+            solve_poisson_problem(M, unit_fct , unit_fct , zero_fct , sin_fct , solution);
             
             // CREATE SOLUTION FILE
             std::string solution_filename;
