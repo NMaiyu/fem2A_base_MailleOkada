@@ -63,6 +63,7 @@ void run_simu()
     const bool simu_sinus_bump=false;
     const bool simu_sinus_bump_error=false; 
     const bool simu_neumann=true;
+    const bool simu_mug =true;
 
     const bool verbose = flag_is_used( "-v", arguments )
         || flag_is_used( "--verbose", arguments );
@@ -81,6 +82,9 @@ void run_simu()
     }
     if( simu_neumann){
         Simu::neumann_pb("data/square_fine.mesh", verbose);
+    }
+    if( simu_mug){
+        Simu::mug_pb("data/mug_0_2.mesh", verbose);
     }
 }
 
